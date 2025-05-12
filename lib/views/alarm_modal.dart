@@ -7,7 +7,7 @@ import '../models/alarm.dart';
 
 class AlarmModal extends StatefulWidget {
   Alarm? alarm;
-  AlarmModal({super.key,this.alarm});
+  AlarmModal({super.key, this.alarm});
 
   @override
   AlarmModalState createState() => AlarmModalState();
@@ -34,7 +34,6 @@ class AlarmModalState extends State<AlarmModal> {
       for (var day in widget.alarm!.listOfDays!) {
         selectedDays[day.dayNumber] = true;
       }
-
     }
   }
 
@@ -43,14 +42,12 @@ class AlarmModalState extends State<AlarmModal> {
   double minHandAngle = 0 - pi / 2;
 
   DateTime _getTime(int hour, int min, bool isAm) {
-
     if (isAm) {
-      if(hour==12){
-        hour=0;
+      if (hour == 12) {
+        hour = 0;
       }
-    }
-    else if(!isAm){
-      if(hour!=12){
+    } else if (!isAm) {
+      if (hour != 12) {
         hour = 12 + hour;
       }
     }
@@ -62,12 +59,21 @@ class AlarmModalState extends State<AlarmModal> {
     DateTime alarmTime = _getTime(hour, minute, isAM);
     alarmViewmodel.saveNewAlarm(alarmTime, selectedDays, isAlarm);
   }
-  void updateAlarm(Alarm alarm){
+
+  void updateAlarm(Alarm alarm) {
+    // alarm.alarmTime = _getTime(hour, minute, isAM);
+    // alarm.listOfDays= alarmViewmodel.convertToDayEnums(selectedDays);
+    // alarm.isAlarm=isAlarm;
+    // alarmViewmodel.updateAlarm(alarm);
+    final oldDays = (alarm.listOfDays != null)
+        ? List<Day>.from(alarm.listOfDays!.cast<Day>())
+        : <Day>[];
+
     alarm.alarmTime = _getTime(hour, minute, isAM);
-    alarm.listOfDays= alarmViewmodel.convertToDayEnums(selectedDays);
-    alarm.isAlarm=isAlarm;
-    alarmViewmodel.updateAlarm(alarm);
-    
+    alarm.listOfDays = alarmViewmodel.convertToDayEnums(selectedDays);
+    alarm.isAlarm = isAlarm;
+
+    alarmViewmodel.updateAlarm(alarm, oldDays: oldDays);
   }
 
   @override
@@ -152,11 +158,11 @@ class AlarmModalState extends State<AlarmModal> {
                 foregroundColor: Colors.grey[300],
               ),
               onPressed: () {
-                widget.alarm!=null ? updateAlarm(widget.alarm!) : saveAlarm();
+                widget.alarm != null ? updateAlarm(widget.alarm!) : saveAlarm();
                 Navigator.pop(context);
               },
               child: Text(
-                widget.alarm!=null?'Update':'Save',
+                widget.alarm != null ? 'Update' : 'Save',
                 style: TextStyle(color: Colors.white),
               ),
             ),

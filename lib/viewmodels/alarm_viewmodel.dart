@@ -39,11 +39,11 @@ class AlarmViewmodel extends ChangeNotifier{
     }
 
     //if no specific days is selected that means all days is selected
-    if (days.isEmpty){
-      for(int ind = 0;ind<7;ind++){
-        days.add(Day.values[ind]);
-      }
-    }
+    // if (days.isEmpty){
+    //   for(int ind = 0;ind<7;ind++){
+    //     days.add(Day.values[ind]);
+    //   }
+    // }
 
     return days;
   }
@@ -73,10 +73,6 @@ class AlarmViewmodel extends ChangeNotifier{
   void saveNewAlarm(DateTime alarm,  List<bool> selectedDays, bool isAlarm) async{
     //   this.id should be generated on the repo before saving
     //other fields should be update with updateAlarm method
-
-
-
-
     DateTime alarmTime = alarm;
     RingTone alarmTone = isAlarm? getAlarmTone() : getPrayerTone(alarmTime);
     List<Day> days = convertToDayEnums(selectedDays);
@@ -89,8 +85,6 @@ class AlarmViewmodel extends ChangeNotifier{
     notifyListeners();
 
 
-
-
     await setAlarmAt(newAlarm);
 
 
@@ -98,16 +92,25 @@ class AlarmViewmodel extends ChangeNotifier{
 
   }
 
-  void updateAlarm(Alarm newAlarm) async{
+  void updateAlarm(Alarm newAlarm, {List<Day>? oldDays}) async{
+    // _alarmRepository.updateAlarmWithIndex(newAlarm.id, newAlarm);
+    // fetchAllAlarms();
+    //
+    // if(newAlarm.isEnabled) {
+    //   await cancelSetAlarm(newAlarm.id);
+    //   await setAlarmAt(newAlarm);
+    // }
+    // else if(!newAlarm.isEnabled){
+    //   await cancelSetAlarm(newAlarm.id);
+    // }
     _alarmRepository.updateAlarmWithIndex(newAlarm.id, newAlarm);
     fetchAllAlarms();
 
-    if(newAlarm.isEnabled) {
-      await cancelSetAlarm(newAlarm.id);
+    if (newAlarm.isEnabled) {
+      await cancelSetAlarm(newAlarm.id, days: oldDays ?? []);
       await setAlarmAt(newAlarm);
-    }
-    else if(!newAlarm.isEnabled){
-      await cancelSetAlarm(newAlarm.id);
+    } else {
+      await cancelSetAlarm(newAlarm.id, days: oldDays ?? []);
     }
 
     // notifyListeners();
