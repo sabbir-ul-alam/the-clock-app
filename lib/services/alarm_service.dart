@@ -13,9 +13,11 @@ void alarmCallBack(){
   print("Alarm triggered in the BG");
   FlutterRingtonePlayer().play(
     android: AndroidSounds.notification,
+    ios: IosSounds.alarm,
     looping: true, // Android only - API >= 28
     volume: 0.1, // Android only - API >= 28
     asAlarm: true, // Android only - all APIs
+
   );
 }
 

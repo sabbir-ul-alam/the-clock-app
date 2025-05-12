@@ -1,4 +1,6 @@
 
+import 'package:theclockapp/utils/logger_service.dart';
+
 import '../models/alarm.dart';
 import '../repositories/alarm_repository.dart';
 import 'package:flutter/material.dart';
@@ -87,6 +89,8 @@ class AlarmViewmodel extends ChangeNotifier{
     notifyListeners();
     await AndroidAlarmManager.oneShotAt(
       alarm,id, alarmCallBack,exact: true,wakeup: true);
+
+    LoggerService.debug(alarm.toString());
 
   }
 

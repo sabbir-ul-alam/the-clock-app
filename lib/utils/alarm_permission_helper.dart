@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:flutter/services.dart';
+import 'logger_service.dart';
 
 Future<void> ensureExactAlarmPermission(BuildContext context) async {
   final status = await Permission.scheduleExactAlarm.status;
-
+  LoggerService.debug(status.toString());
   if (status != PermissionStatus.granted) {
     // Guard with a mounted check
     if (!context.mounted) return;

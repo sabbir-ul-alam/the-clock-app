@@ -43,9 +43,19 @@ class AlarmModalState extends State<AlarmModal> {
   double minHandAngle = 0 - pi / 2;
 
   DateTime _getTime(int hour, int min, bool isAm) {
-    final amPm = isAm ? 'AM' : 'PM';
-    return DateFormat("hh:mma")
-        .parse(hour.toString() + ':' + min.toString() + amPm);
+
+    if (isAm) {
+      if(hour==12){
+        hour=0;
+      }
+    }
+    else if(!isAm){
+      if(hour!=12){
+        hour = 12 + hour;
+      }
+    }
+    var now = DateTime.now();
+    return DateTime(now.year, now.month, now.day, hour, min);
   }
 
   void saveAlarm() {
