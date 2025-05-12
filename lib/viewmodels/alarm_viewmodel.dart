@@ -55,16 +55,12 @@ class AlarmViewmodel extends ChangeNotifier{
   RingTone getPrayerTone(DateTime time){
     // /final fajrPrayerTonePath = await rootBundle.load('assets/ringtones/fajr.mp3');
     // final otherPrayerTonePath = await rootBundle.load('assets/ringtones/otherPrayer.mp3');
-
     if(time.hour >=3 && time.hour<=10){
       return RingTone('Fajr','assets/ringtones/fajr.mp3');
     }
     else{
       return RingTone('OtherPrayer', 'assets/ringtones/otherPrayer.mp3');
     }
-
-
-
   }
 
   RingTone getAlarmTone(){
@@ -77,8 +73,12 @@ class AlarmViewmodel extends ChangeNotifier{
   void saveNewAlarm(DateTime alarm,  List<bool> selectedDays, bool isAlarm) async{
     //   this.id should be generated on the repo before saving
     //other fields should be update with updateAlarm method
+
+
+
+
     DateTime alarmTime = alarm;
-    RingTone alarmTone = isAlarm?getAlarmTone():getPrayerTone(alarmTime);
+    RingTone alarmTone = isAlarm? getAlarmTone() : getPrayerTone(alarmTime);
     List<Day> days = convertToDayEnums(selectedDays);
     Alarm newAlarm = Alarm(
       alarmTime: alarmTime,
@@ -87,8 +87,12 @@ class AlarmViewmodel extends ChangeNotifier{
     newAlarm.id = id;
     listOfAlarm.add(newAlarm);
     notifyListeners();
-    await AndroidAlarmManager.oneShotAt(
-      alarm,id, alarmCallBack,exact: true,wakeup: true);
+
+
+
+
+    await setAlarmAt(newAlarm);
+
 
     LoggerService.debug(alarm.toString());
 
@@ -98,14 +102,13 @@ class AlarmViewmodel extends ChangeNotifier{
     _alarmRepository.updateAlarmWithIndex(newAlarm.id, newAlarm);
     fetchAllAlarms();
 
-    await AndroidAlarmManager.cancel(newAlarm.id);
-    await AndroidAlarmManager.oneShotAt(
-      newAlarm.alarmTime,
-      newAlarm.id,
-      alarmCallBack,
-      exact: true,
-      wakeup: true,
-    );
+    if(newAlarm.isEnabled) {
+      await cancelSetAlarm(newAlarm.id);
+      await setAlarmAt(newAlarm);
+    }
+    else if(!newAlarm.isEnabled){
+      await cancelSetAlarm(newAlarm.id);
+    }
 
     // notifyListeners();
 
@@ -117,9 +120,4 @@ class AlarmViewmodel extends ChangeNotifier{
     notifyListeners();
     
   }
-
-
-
-
-
 }
