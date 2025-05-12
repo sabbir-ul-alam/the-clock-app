@@ -8,13 +8,22 @@ import 'package:android_intent_plus/flag.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import '../models/alarm.dart';
 import '../repositories/alarm_repository.dart';
+import 'hive_service.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:flutter/services.dart';
+import '../utils/logger_service.dart';
+
 
 
 @pragma('vm:entry-point')
-void alarmCallBack(Map<String, dynamic> params) async{
+void alarmCallBack(int id, Map<String, dynamic> params) async{
   print("Alarm triggered in the BG");
   final int? alarmId = params['alarmId'];
   if (alarmId == null) return;
+  await initHive();
+
+
+
   final AlarmRepository repository = await AlarmRepository.init();
   // Fetch alarm using your repository method
   final Alarm? alarm = repository.getAlarmById(alarmId);
@@ -23,7 +32,7 @@ void alarmCallBack(Map<String, dynamic> params) async{
 
   if (!alarm.isAlarm) {
     FlutterRingtonePlayer().play(
-      fromAsset: tonePath,
+      fromFile: tonePath,
       ios: IosSounds.alarm,
       looping: true,
       volume: 1,
@@ -38,6 +47,8 @@ void alarmCallBack(Map<String, dynamic> params) async{
       asAlarm: true, // Android only - all APIs
     );
   }
+  print("Alarm ID: $alarmId, isAlarm: ${alarm.isAlarm}, tonePath: ${alarm.ringTonePath?.tonePath}");
+
 }
 
 Future<void> setAlarmAt(Alarm newAlarm) async {
@@ -87,6 +98,8 @@ Future<void> _scheduleAlarmInstances(Alarm alarm) async {
         ? alarm.alarmTime.add(Duration(days: 1))
         : alarm.alarmTime;
 
+    LoggerService.debug(targetTime.toString());
+
     await AndroidAlarmManager.oneShotAt(
       targetTime,
       alarm.id,
@@ -104,6 +117,9 @@ Future<void> _scheduleAlarmInstances(Alarm alarm) async {
 
       int uniqueId = alarm.id * 10 + day.dayNumber;
 
+      LoggerService.debug(nextTime.toString());
+
+
       await AndroidAlarmManager.oneShotAt(
         nextTime,
         uniqueId,
@@ -115,4 +131,17 @@ Future<void> _scheduleAlarmInstances(Alarm alarm) async {
       );
     }
   }
+}
+
+Future<String> copyAssetToFile(String assetPath, String fileName) async {
+  final byteData = await rootBundle.load(assetPath);
+  final directory = await getApplicationDocumentsDirectory();
+  final filePath = '${directory.path}/$fileName';
+
+  final file = File(filePath);
+  await file.writeAsBytes(
+    byteData.buffer.asUint8List(byteData.offsetInBytes, byteData.lengthInBytes),
+  );
+
+  return filePath;
 }

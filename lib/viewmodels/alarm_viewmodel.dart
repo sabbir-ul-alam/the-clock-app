@@ -5,7 +5,6 @@ import '../models/alarm.dart';
 import '../repositories/alarm_repository.dart';
 import 'package:flutter/material.dart';
 import '../services/alarm_service.dart';
-import 'package:android_alarm_manager_plus/android_alarm_manager_plus.dart';
 
 
 
@@ -53,14 +52,19 @@ class AlarmViewmodel extends ChangeNotifier{
     return alarmDays.contains(Day.values[ind]);
   }
 
-  RingTone getPrayerTone(DateTime time){
-    // /final fajrPrayerTonePath = await rootBundle.load('assets/ringtones/fajr.mp3');
-    // final otherPrayerTonePath = await rootBundle.load('assets/ringtones/otherPrayer.mp3');
-    if(time.hour >=3 && time.hour<=10){
-      return RingTone('Fajr','assets/ringtones/fajr.mp3');
-    }
+  Future<RingTone> getPrayerTone(DateTime time) async{
+
+
+      if(time.hour >=3 && time.hour<=10){
+        final copiedTonePath = await copyAssetToFile('assets/ringtones/fajr.mp3',
+            'fajr.mp3');
+        return RingTone('fajrPrayer', copiedTonePath);
+      }
     else{
-      return RingTone('OtherPrayer', 'assets/ringtones/otherPrayer.mp3');
+        final copiedTonePath = await copyAssetToFile('assets/ringtones/otherPrayer.mp3',
+            'otherPrayer.mp3');
+        return RingTone('otherPrayer', copiedTonePath); // now this is a real file path
+
     }
   }
 
@@ -75,7 +79,7 @@ class AlarmViewmodel extends ChangeNotifier{
     //   this.id should be generated on the repo before saving
     //other fields should be update with updateAlarm method
     DateTime alarmTime = alarm;
-    RingTone alarmTone = isAlarm? getAlarmTone() : getPrayerTone(alarmTime);
+    RingTone alarmTone = isAlarm? getAlarmTone() : await getPrayerTone(alarmTime);
     List<Day> days = convertToDayEnums(selectedDays);
     Alarm newAlarm = Alarm(
       alarmTime: alarmTime,
@@ -85,11 +89,8 @@ class AlarmViewmodel extends ChangeNotifier{
     listOfAlarm.add(newAlarm);
     notifyListeners();
 
-
     await setAlarmAt(newAlarm);
 
-
-    LoggerService.debug(alarm.toString());
 
   }
 
