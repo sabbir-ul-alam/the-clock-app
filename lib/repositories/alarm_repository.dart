@@ -24,10 +24,11 @@ class AlarmRepository{
 
 
 
-  void addAlarm(Alarm alarm) async{
+  Future<int> addAlarm(Alarm alarm) async{
     final id = _getNextId();
     alarm.id = id;
     await _alarmBox.put(id,alarm);
+    return alarm.id;
   }
 
   List<Alarm> getAlarms(){

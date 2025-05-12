@@ -4,12 +4,12 @@ import '../viewmodels/alarm_viewmodel.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:intl/intl.dart';
 import 'alarm_modal.dart';
-import 'dart:async';
+import '../utils/alarm_permission_helper.dart';
 
 class AlarmTab extends StatefulWidget {
   final AlarmViewmodel alarmViewmodel;
 
-  AlarmTab({super.key, required this.alarmViewmodel});
+  const AlarmTab({super.key, required this.alarmViewmodel});
 
   @override
   AlarmTabState createState() => AlarmTabState();
@@ -23,10 +23,19 @@ class AlarmTabState extends State<AlarmTab> {
     // TODO: implement initState
     super.initState();
     widget.alarmViewmodel.fetchAllAlarms();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      // Safe to use `context`, `await`, dialogs, or push routes here
+      await ensureExactAlarmPermission(context);
+    });
   }
 
   @override
   Widget build(BuildContext context) {
+    // WidgetsBinding.instance.addPostFrameCallback((_) async {
+    //   // Safe to use `context`, `await`, dialogs, or push routes here
+    //   await ensureExactAlarmPermission(context);
+    // });
+
     return LayoutBuilder(builder: (context, constraints) {
       final totalHeight = constraints.maxHeight;
       final topHeight = totalHeight * _dividerPosition;
@@ -198,7 +207,7 @@ class CategoryContainer extends StatelessWidget {
                         } else {
                           alarm.isEnabled = true;
                         }
-                        alarmViewmodel.updateAlam(alarm);
+                        alarmViewmodel.updateAlarm(alarm);
                       },
                       child: Container(
                         width: 48,

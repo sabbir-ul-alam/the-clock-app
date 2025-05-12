@@ -56,7 +56,7 @@ class AlarmModalState extends State<AlarmModal> {
     alarm.alarmTime = _getTime(hour, minute, isAM);
     alarm.listOfDays= alarmViewmodel.convertToDayEnums(selectedDays);
     alarm.isAlarm=isAlarm;
-    alarmViewmodel.updateAlam(alarm);
+    alarmViewmodel.updateAlarm(alarm);
     
   }
 
@@ -142,7 +142,6 @@ class AlarmModalState extends State<AlarmModal> {
                 foregroundColor: Colors.grey[300],
               ),
               onPressed: () {
-
                 widget.alarm!=null ? updateAlarm(widget.alarm!) : saveAlarm();
                 Navigator.pop(context);
               },

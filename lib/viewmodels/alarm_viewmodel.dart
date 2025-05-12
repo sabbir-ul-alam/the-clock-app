@@ -2,6 +2,9 @@
 import '../models/alarm.dart';
 import '../repositories/alarm_repository.dart';
 import 'package:flutter/material.dart';
+import '../services/alarm_service.dart';
+import 'package:android_alarm_manager_plus/android_alarm_manager_plus.dart';
+
 
 class AlarmViewmodel extends ChangeNotifier{
   // Static instance
@@ -69,23 +72,37 @@ class AlarmViewmodel extends ChangeNotifier{
   }
 
 
-  void saveNewAlarm(DateTime alarm,  List<bool> selectedDays, bool isAlarm) {
+  void saveNewAlarm(DateTime alarm,  List<bool> selectedDays, bool isAlarm) async{
     //   this.id should be generated on the repo before saving
     //other fields should be update with updateAlarm method
     DateTime alarmTime = alarm;
     RingTone alarmTone = isAlarm?getAlarmTone():getPrayerTone(alarmTime);
     List<Day> days = convertToDayEnums(selectedDays);
     Alarm newAlarm = Alarm(
-      alarmTime: alarmTime, ringTonePath: alarmTone, listOfDays: days, isAlarm: isAlarm);
-    _alarmRepository.addAlarm(newAlarm);
+      alarmTime: alarmTime,
+        ringTonePath: alarmTone, listOfDays: days, isAlarm: isAlarm);
+    final int id = await _alarmRepository.addAlarm(newAlarm);
+    newAlarm.id = id;
     listOfAlarm.add(newAlarm);
     notifyListeners();
+    await AndroidAlarmManager.oneShotAt(
+      alarm,id, alarmCallBack,exact: true,wakeup: true);
 
   }
 
-  void updateAlam(Alarm newAlarm){
+  void updateAlarm(Alarm newAlarm) async{
     _alarmRepository.updateAlarmWithIndex(newAlarm.id, newAlarm);
     fetchAllAlarms();
+
+    await AndroidAlarmManager.cancel(newAlarm.id);
+    await AndroidAlarmManager.oneShotAt(
+      newAlarm.alarmTime,
+      newAlarm.id,
+      alarmCallBack,
+      exact: true,
+      wakeup: true,
+    );
+
     // notifyListeners();
 
   }

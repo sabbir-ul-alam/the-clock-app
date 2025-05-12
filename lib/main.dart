@@ -3,11 +3,17 @@ import 'package:theclockapp/views/home.dart';
 import 'services/timezone_service.dart';
 import 'services/hive_service.dart';
 import 'viewmodels/alarm_viewmodel.dart';
+import 'package:android_alarm_manager_plus/android_alarm_manager_plus.dart';
+import 'services/alarm_service.dart';
+
+
 void main() async{
   WidgetsFlutterBinding.ensureInitialized();
   initTimeZone();
   await initHive();
   await AlarmViewmodel().initHiveRepo();
+  await AndroidAlarmManager.initialize();
+
   runApp(const MyApp());
 }
 
