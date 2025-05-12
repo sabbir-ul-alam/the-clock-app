@@ -82,7 +82,8 @@ flutter:
   uses-material-design: true
   assets:
     - assets/databases/world.sqlite3
-    - assets/ringtones/
+    - assets/ringtones/fajr.mp3
+    - assets/ringtones/otherPrayer.mp3
     - assets/icons/check.svg
     - assets/icons/cross.svg
     - assets/icons/music.svg

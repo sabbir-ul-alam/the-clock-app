@@ -7,17 +7,37 @@ import 'package:android_intent_plus/android_intent.dart';
 import 'package:android_intent_plus/flag.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import '../models/alarm.dart';
+import '../repositories/alarm_repository.dart';
+
 
 @pragma('vm:entry-point')
-void alarmCallBack() {
+void alarmCallBack(Map<String, dynamic> params) async{
   print("Alarm triggered in the BG");
-  FlutterRingtonePlayer().play(
-    android: AndroidSounds.notification,
-    ios: IosSounds.alarm,
-    looping: true, // Android only - API >= 28
-    volume: 0.1, // Android only - API >= 28
-    asAlarm: true, // Android only - all APIs
-  );
+  final int? alarmId = params['alarmId'];
+  if (alarmId == null) return;
+  final AlarmRepository repository = await AlarmRepository.init();
+  // Fetch alarm using your repository method
+  final Alarm? alarm = repository.getAlarmById(alarmId);
+  if (alarm == null) return;
+  final String? tonePath = alarm.ringTonePath?.tonePath;
+
+  if (!alarm.isAlarm) {
+    FlutterRingtonePlayer().play(
+      fromAsset: tonePath,
+      ios: IosSounds.alarm,
+      looping: true,
+      volume: 1,
+      asAlarm: true,
+    );
+  }else{
+    FlutterRingtonePlayer().play(
+      android: AndroidSounds.alarm,
+      ios: IosSounds.alarm,
+      looping: true, // Android only - API >= 28
+      volume: 1, // Android only - API >= 28
+      asAlarm: true, // Android only - all APIs
+    );
+  }
 }
 
 Future<void> setAlarmAt(Alarm newAlarm) async {
@@ -74,6 +94,7 @@ Future<void> _scheduleAlarmInstances(Alarm alarm) async {
       alarmClock: true,
       wakeup: true,
       rescheduleOnReboot: true,
+      params: {'alarmId': alarm.id},
     );
 
   } else {
@@ -90,6 +111,7 @@ Future<void> _scheduleAlarmInstances(Alarm alarm) async {
         alarmClock: true,
         wakeup: true,
         rescheduleOnReboot: true,
+        params: {'alarmId': alarm.id},
       );
     }
   }
