@@ -1,13 +1,7 @@
 import 'dart:isolate';
-
 import 'package:flutter_ringtone_player/flutter_ringtone_player.dart';
 import 'dart:io';
-import 'package:flutter/material.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:android_alarm_manager_plus/android_alarm_manager_plus.dart';
-import 'package:android_intent_plus/android_intent.dart';
-import 'package:android_intent_plus/flag.dart';
-import 'package:device_info_plus/device_info_plus.dart';
 import '../models/alarm.dart';
 import '../repositories/alarm_repository.dart';
 import 'hive_service.dart';
@@ -15,75 +9,176 @@ import 'package:path_provider/path_provider.dart';
 import 'package:flutter/services.dart';
 import '../utils/logger_service.dart';
 import 'notification_service.dart';
-
+import 'dart:ui';
 
 
 @pragma('vm:entry-point')
-void alarmCallBack(int id, Map<String, dynamic> params) async{
-  print("Alarm Isolate: ${Isolate.current.hashCode}");
-  print("Alarm triggered in the BG");
-  final int? alarmId = params['alarmId'];
-  if (alarmId == null) return;
-  await initHive();
-  final AlarmRepository repository = await AlarmRepository.init();
-  // Fetch alarm using your repository method
-  final Alarm? alarm = repository.getAlarmById(alarmId);
-  if (alarm == null) return;
-  final String? tonePath = alarm.ringTonePath?.tonePath;
+void alarmCallBack(int id, Map<String, dynamic> params) async {
+  try {
+    print("Alarm Isolate: ${Isolate.current.hashCode}");
 
-  if (!alarm.isAlarm) {
-    FlutterRingtonePlayer().play(
-      fromFile: tonePath,
-      ios: IosSounds.alarm,
-      looping: true,
-      volume: 1,
-      asAlarm: true,
-    );
-  }else{
-    FlutterRingtonePlayer().play(
-      android: AndroidSounds.alarm,
-      ios: IosSounds.alarm,
-      looping: true, // Android only - API >= 28
-      volume: 1, // Android only - API >= 28
-      asAlarm: true, // Android only - all APIs
-    );
+    final int? alarmId = params['alarmId'];
+    final String? tonePath = params['ringTonePath'];
+    bool isAlarm = params["isAlarm"];
+
+    if (alarmId == null) return;
+
+    final portName = 'alarm_command_channel_$alarmId';
+    IsolateNameServer.removePortNameMapping(portName);
+    final receivePort = ReceivePort();
+    IsolateNameServer.registerPortWithName(receivePort.sendPort, portName);
+
+    if (!isAlarm) {
+      FlutterRingtonePlayer().play(
+        fromFile: tonePath,
+        ios: IosSounds.alarm,
+        looping: true,
+        volume: 1,
+        asAlarm: true,
+      );
+    } else {
+      FlutterRingtonePlayer().play(
+        android: AndroidSounds.alarm,
+        ios: IosSounds.alarm,
+        looping: true,
+        volume: 1,
+        asAlarm: true,
+      );
+    }
+    print("Alarm triggered in the BG ${alarmId}");
+
+    final mainIsolatePort =
+    IsolateNameServer.lookupPortByName('alarm_event_channel');
+    mainIsolatePort?.send({'type': 'alarm_started', 'alarmId': alarmId});
+
+    bool stopped = false;
+    await receivePort.timeout(
+      const Duration(seconds: 60),
+      onTimeout: (sink) {
+        print("[Timeout] Auto-stopping alarm.");
+        FlutterRingtonePlayer().stop();
+        receivePort.close();
+        IsolateNameServer.removePortNameMapping(portName);
+        stopped = true;
+      },
+    ).forEach((msg) {
+      if (msg == 'stop_alarm') {
+        print("[Message] Stop alarm command received.");
+        FlutterRingtonePlayer().stop();
+        receivePort.close();
+        IsolateNameServer.removePortNameMapping(portName);
+        stopped = true;
+      }
+      print(
+          "[EXIT] alarmId $alarmId isolate completed, msg $msg port $portName");
+    });
+
+    print("Alarm ID: $alarmId, isAlarm: ${isAlarm}, tonePath: ${tonePath}");
+    print("Alarm ID: $alarmId");
+
+  }catch(e){
+    print("Error failed $e");
   }
-  print("Alarm ID: $alarmId, isAlarm: ${alarm.isAlarm}, tonePath: ${alarm.ringTonePath?.tonePath}");
-  await showAlarmNotification(alarmId);
-
-
 }
 
+
+// @pragma('vm:entry-point')
+// void alarmCallBack(int id, Map<String, dynamic> params) async {
+//   try {
+//     print("Alarm Isolate: ${Isolate.current.hashCode}");
+//
+//     final int? alarmId = params['alarmId'];
+//
+//     if (alarmId == null) return;
+//
+//     await initHive();
+//     final AlarmRepository repository = await AlarmRepository.init();
+//     final Alarm? alarm = repository.getAlarmById(alarmId);
+//
+//     print("From hive $alarm");
+//     if (alarm == null) return;
+//
+//     final String? tonePath = alarm.ringTonePath?.tonePath;
+//
+//     final portName = 'alarm_command_channel_$alarmId';
+//     IsolateNameServer.removePortNameMapping(portName);
+//     final receivePort = ReceivePort();
+//     IsolateNameServer.registerPortWithName(receivePort.sendPort, portName);
+//
+//     if (!alarm.isAlarm) {
+//       FlutterRingtonePlayer().play(
+//         fromFile: tonePath,
+//         ios: IosSounds.alarm,
+//         looping: true,
+//         volume: 1,
+//         asAlarm: true,
+//       );
+//     } else {
+//       FlutterRingtonePlayer().play(
+//         android: AndroidSounds.alarm,
+//         ios: IosSounds.alarm,
+//         looping: true,
+//         volume: 1,
+//         asAlarm: true,
+//       );
+//     }
+//     print("Alarm triggered in the BG ${alarmId}");
+//
+//     // final mainIsolatePort =
+//     // IsolateNameServer.lookupPortByName('alarm_event_channel');
+//     // mainIsolatePort?.send({'type': 'alarm_started', 'alarmId': alarmId});
+//     //
+//     // bool stopped = false;
+//     // await receivePort.timeout(
+//     //   const Duration(seconds: 60),
+//     //   onTimeout: (sink) {
+//     //     print("[Timeout] Auto-stopping alarm.");
+//     //     FlutterRingtonePlayer().stop();
+//     //     receivePort.close();
+//     //     IsolateNameServer.removePortNameMapping(portName);
+//     //     stopped = true;
+//     //   },
+//     // ).forEach((msg) {
+//     //   if (msg == 'stop_alarm') {
+//     //     print("[Message] Stop alarm command received.");
+//     //     FlutterRingtonePlayer().stop();
+//     //     receivePort.close();
+//     //     IsolateNameServer.removePortNameMapping(portName);
+//     //     stopped = true;
+//     //   }
+//     //   print(
+//     //       "[EXIT] alarmId $alarmId isolate completed, msg $msg port $portName");
+//     // // });
+//     //
+//     // print("Alarm ID: $alarmId, isAlarm: ${alarm.isAlarm}, tonePath: ${alarm
+//     //     .ringTonePath?.tonePath}");
+//
+//   }catch(e){
+//     print("Error failed $e");
+//   }
+// }
+
 Future<void> setAlarmAt(Alarm newAlarm) async {
-  //if old time is set, then add one day
-  // if (newAlarm.alarmTime.isBefore(DateTime.now())) {
-  //   newAlarm.alarmTime = newAlarm.alarmTime.add(Duration(days: 1));
-  // }
-  // await AndroidAlarmManager.oneShotAt(
-  //     newAlarm.alarmTime, newAlarm.id, alarmCallBack,
-  //     alarmClock: true, wakeup: true, rescheduleOnReboot: true);
   _scheduleAlarmInstances(newAlarm);
 }
 
 Future<void> cancelSetAlarm(int baseId, {List<Day>? days}) async {
-  // await AndroidAlarmManager.cancel(alarmId);
-    if (days == null || days.isEmpty) {
-      await AndroidAlarmManager.cancel(baseId);
-      print("One-time alarm cancelled (ID: $baseId)");
-    } else {
-      for (Day d in days) {
-        final recurringId = baseId * 10 + d.dayNumber;
-        await AndroidAlarmManager.cancel(recurringId);
-        print("Recurring alarm cancelled (ID: $recurringId)");
-      }
+  if (days == null || days.isEmpty) {
+    await AndroidAlarmManager.cancel(baseId);
+    print("One-time alarm cancelled (ID: $baseId)");
+  } else {
+    for (Day d in days) {
+      final recurringId = baseId * 10 + d.dayNumber;
+      await AndroidAlarmManager.cancel(recurringId);
+      print("Recurring alarm cancelled (ID: $recurringId)");
     }
   }
+}
 
 DateTime _nextDateForWeekday(DateTime time, int targetDay) {
   final now = DateTime.now();
-  final today = now.weekday % 7; // normalize Sunday = 0
+  final today = now.weekday % 7;
   final diff = (targetDay - today + 7) % 7;
-
   final scheduledDay = now.add(Duration(days: diff));
   return DateTime(
     scheduledDay.year,
@@ -96,7 +191,6 @@ DateTime _nextDateForWeekday(DateTime time, int targetDay) {
 
 Future<void> _scheduleAlarmInstances(Alarm alarm) async {
   if ((alarm.listOfDays?.isEmpty ?? true)) {
-    // One-time alarm
     DateTime targetTime = alarm.alarmTime.isBefore(DateTime.now())
         ? alarm.alarmTime.add(Duration(days: 1))
         : alarm.alarmTime;
@@ -110,18 +204,18 @@ Future<void> _scheduleAlarmInstances(Alarm alarm) async {
       alarmClock: true,
       wakeup: true,
       rescheduleOnReboot: true,
-      params: {'alarmId': alarm.id},
+      params: {
+        'alarmId': alarm.id,
+        'ringTonePath': alarm.ringTonePath!.tonePath,
+        'isAlarm': alarm.isAlarm
+      },
     );
-
   } else {
-    //  Weekly recurring alarms
     for (Day day in alarm.listOfDays!) {
       DateTime nextTime = _nextDateForWeekday(alarm.alarmTime, day.dayNumber);
-
       int uniqueId = alarm.id * 10 + day.dayNumber;
 
       LoggerService.debug(nextTime.toString());
-
 
       await AndroidAlarmManager.oneShotAt(
         nextTime,
@@ -130,7 +224,11 @@ Future<void> _scheduleAlarmInstances(Alarm alarm) async {
         alarmClock: true,
         wakeup: true,
         rescheduleOnReboot: true,
-        params: {'alarmId': alarm.id},
+        params: {
+          'alarmId': alarm.id,
+          'ringTonePath': alarm.ringTonePath!.tonePath,
+          'isAlarm': alarm.isAlarm
+        },
       );
     }
   }
@@ -143,7 +241,8 @@ Future<String> copyAssetToFile(String assetPath, String fileName) async {
 
   final file = File(filePath);
   await file.writeAsBytes(
-    byteData.buffer.asUint8List(byteData.offsetInBytes, byteData.lengthInBytes),
+    byteData.buffer.asUint8List(
+        byteData.offsetInBytes, byteData.lengthInBytes),
   );
 
   return filePath;

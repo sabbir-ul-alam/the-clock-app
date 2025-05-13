@@ -10,6 +10,7 @@ class AlarmRepository{
   static Future<AlarmRepository> init() async {
     final alarmBox = await Hive.openBox<Alarm>('alarms');
     final settingsBox = await Hive.openBox('alarm_settings');
+    print("[AlarmRepository] alarmBox keys: ${alarmBox.keys}");
     return AlarmRepository._internal(alarmBox, settingsBox);
   }
 
