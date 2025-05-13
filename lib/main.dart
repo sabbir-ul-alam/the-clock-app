@@ -5,6 +5,7 @@ import 'services/hive_service.dart';
 import 'viewmodels/alarm_viewmodel.dart';
 import 'package:android_alarm_manager_plus/android_alarm_manager_plus.dart';
 import 'services/alarm_service.dart';
+import 'services/notification_service.dart';
 
 
 void main() async{
@@ -13,6 +14,7 @@ void main() async{
   await initHive();
   await AlarmViewmodel().initHiveRepo();
   await AndroidAlarmManager.initialize();
+  await initNotificationService();
 
   runApp(const MyApp());
 }

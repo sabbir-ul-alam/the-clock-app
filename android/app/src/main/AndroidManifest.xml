@@ -6,6 +6,9 @@
     <!-- For apps with targetSDK 31 (Android 12) and newer -->
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM"/>
 
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
+
     <application
         android:label="theclockapp"
         android:name="${applicationName}"
@@ -28,6 +31,10 @@
               android:name="io.flutter.embedding.android.NormalTheme"
               android:resource="@style/NormalTheme"
               />
+            <meta-data
+                android:name="com.google.firebase.messaging.default_notification_channel_id"
+                android:value="alarm_channel"/>
+
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>

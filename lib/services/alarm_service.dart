@@ -1,3 +1,5 @@
+import 'dart:isolate';
+
 import 'package:flutter_ringtone_player/flutter_ringtone_player.dart';
 import 'dart:io';
 import 'package:flutter/material.dart';
@@ -12,18 +14,17 @@ import 'hive_service.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:flutter/services.dart';
 import '../utils/logger_service.dart';
+import 'notification_service.dart';
 
 
 
 @pragma('vm:entry-point')
 void alarmCallBack(int id, Map<String, dynamic> params) async{
+  print("Alarm Isolate: ${Isolate.current.hashCode}");
   print("Alarm triggered in the BG");
   final int? alarmId = params['alarmId'];
   if (alarmId == null) return;
   await initHive();
-
-
-
   final AlarmRepository repository = await AlarmRepository.init();
   // Fetch alarm using your repository method
   final Alarm? alarm = repository.getAlarmById(alarmId);
@@ -48,6 +49,8 @@ void alarmCallBack(int id, Map<String, dynamic> params) async{
     );
   }
   print("Alarm ID: $alarmId, isAlarm: ${alarm.isAlarm}, tonePath: ${alarm.ringTonePath?.tonePath}");
+  await showAlarmNotification(alarmId);
+
 
 }
 
