@@ -4,6 +4,8 @@ import 'package:intl/intl.dart';
 import '../viewmodels/alarm_viewmodel.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../models/alarm.dart';
+import 'ringtone_picker_modal.dart';
+import '../services/ringtone_picker_service.dart';
 
 class AlarmModal extends StatefulWidget {
   Alarm? alarm;
@@ -14,9 +16,11 @@ class AlarmModal extends StatefulWidget {
 }
 
 class AlarmModalState extends State<AlarmModal> {
+  RingTone? selectedTone;
   int hour = 12;
   int minute = 0;
   bool isAM = true;
+
   bool selectingHour = true;
   bool isAlarm = true;
   List<bool> selectedDays = List.generate(7, (index) => false);
@@ -34,8 +38,23 @@ class AlarmModalState extends State<AlarmModal> {
       for (var day in widget.alarm!.listOfDays!) {
         selectedDays[day.dayNumber] = true;
       }
+      selectedTone = widget.alarm!.ringTonePath;
+    }
+    else{
+      _loadLastSelectedTone();
     }
   }
+  void _loadLastSelectedTone() async {
+    final lastTone = await RingtonePickerService.getLastSelectedTone();
+    if (lastTone != null) {
+      setState(() {
+        selectedTone = RingTone(lastTone['name']!, lastTone['uri']!);
+      });
+    }
+  }
+
+
+
 
   // double handAngle = 270*pi/180;
   double hourHandAngle = 0 - pi / 2;
@@ -57,14 +76,11 @@ class AlarmModalState extends State<AlarmModal> {
 
   void saveAlarm() {
     DateTime alarmTime = _getTime(hour, minute, isAM);
-    alarmViewmodel.saveNewAlarm(alarmTime, selectedDays, isAlarm);
+    alarmViewmodel.saveNewAlarm(alarmTime, selectedDays, isAlarm, selectedTone!);
   }
 
   void updateAlarm(Alarm alarm) {
-    // alarm.alarmTime = _getTime(hour, minute, isAM);
-    // alarm.listOfDays= alarmViewmodel.convertToDayEnums(selectedDays);
-    // alarm.isAlarm=isAlarm;
-    // alarmViewmodel.updateAlarm(alarm);
+
     final oldDays = (alarm.listOfDays != null)
         ? List<Day>.from(alarm.listOfDays!.cast<Day>())
         : <Day>[];
@@ -72,6 +88,7 @@ class AlarmModalState extends State<AlarmModal> {
     alarm.alarmTime = _getTime(hour, minute, isAM);
     alarm.listOfDays = alarmViewmodel.convertToDayEnums(selectedDays);
     alarm.isAlarm = isAlarm;
+    alarm.ringTonePath = selectedTone;
 
     alarmViewmodel.updateAlarm(alarm, oldDays: oldDays);
   }
@@ -104,6 +121,33 @@ class AlarmModalState extends State<AlarmModal> {
                 ),
               ])),
               InkWell(
+                onTap: () async {
+                  final selected =
+                      await showModalBottomSheet<Map<String, String>>(
+                    context: context,
+                    isScrollControlled: true,
+                    builder: (_) => SizedBox(
+                      height: MediaQuery.of(context).size.height * 0.7,
+                      child: RingtonePickerModal(
+                        selectedUri:
+                            selectedTone?.tonePath, // pass existing selection
+                      ),
+                    ),
+                  );
+
+                  if (selected != null) {
+                    setState(() {
+                      selectedTone =
+                          RingTone(selected['name']!, selected['uri']!);
+                    });
+                    // Optionally save to SharedPreferences for future default use
+                  }else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text("No ringtone selected")),
+                    );
+                  }
+
+                },
                 child: Ink(
                   height: 50,
                   width: 60,

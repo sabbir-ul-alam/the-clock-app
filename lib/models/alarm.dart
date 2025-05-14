@@ -51,7 +51,7 @@ class Alarm extends HiveObject{
   @HiveField(2)
   DateTime alarmTime;
   @HiveField(3)
-  final RingTone? ringTonePath;
+  RingTone? ringTonePath;
   @HiveField(4)
   int snoozeDuration;
   @HiveField(5)

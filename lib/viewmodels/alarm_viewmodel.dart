@@ -68,18 +68,13 @@ class AlarmViewmodel extends ChangeNotifier{
     }
   }
 
-  RingTone getAlarmTone(){
-    //dummy
-    RingTone tone = RingTone('dummy', 'dummy');
-    return tone;
-  }
 
 
-  void saveNewAlarm(DateTime alarm,  List<bool> selectedDays, bool isAlarm) async{
+  void saveNewAlarm(DateTime alarm,  List<bool> selectedDays, bool isAlarm, RingTone tone) async{
     //   this.id should be generated on the repo before saving
     //other fields should be update with updateAlarm method
     DateTime alarmTime = alarm;
-    RingTone alarmTone = isAlarm? getAlarmTone() : await getPrayerTone(alarmTime);
+    RingTone alarmTone = isAlarm? tone : await getPrayerTone(alarmTime);
     List<Day> days = convertToDayEnums(selectedDays);
     Alarm newAlarm = Alarm(
       alarmTime: alarmTime,
@@ -94,17 +89,8 @@ class AlarmViewmodel extends ChangeNotifier{
 
   }
 
-  void updateAlarm(Alarm newAlarm, {List<Day>? oldDays}) async{
-    // _alarmRepository.updateAlarmWithIndex(newAlarm.id, newAlarm);
-    // fetchAllAlarms();
-    //
-    // if(newAlarm.isEnabled) {
-    //   await cancelSetAlarm(newAlarm.id);
-    //   await setAlarmAt(newAlarm);
-    // }
-    // else if(!newAlarm.isEnabled){
-    //   await cancelSetAlarm(newAlarm.id);
-    // }
+  void updateAlarm(Alarm newAlarm, {List<Day>? oldDays} ) async{
+
     _alarmRepository.updateAlarmWithIndex(newAlarm.id, newAlarm);
     fetchAllAlarms();
 

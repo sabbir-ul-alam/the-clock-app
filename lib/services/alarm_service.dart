@@ -23,27 +23,52 @@ void alarmCallBack(int id, Map<String, dynamic> params) async {
 
     if (alarmId == null) return;
 
+    FlutterRingtonePlayer().play(
+      android: AndroidSounds.notification,
+      volume: 0.0,
+      asAlarm: true,
+      looping: false, // important: don't loop
+    );
+
     final portName = 'alarm_command_channel_$alarmId';
     IsolateNameServer.removePortNameMapping(portName);
     final receivePort = ReceivePort();
     IsolateNameServer.registerPortWithName(receivePort.sendPort, portName);
 
     if (!isAlarm) {
-      FlutterRingtonePlayer().play(
-        fromFile: tonePath,
-        ios: IosSounds.alarm,
-        looping: true,
-        volume: 1,
-        asAlarm: true,
-      );
+      Future.delayed(Duration(milliseconds: 300), () {
+        FlutterRingtonePlayer().play(
+          fromFile: tonePath,
+          ios: IosSounds.alarm,
+          looping: true,
+          volume: 1,
+          asAlarm: true,
+        );
+      });
     } else {
-      FlutterRingtonePlayer().play(
-        android: AndroidSounds.alarm,
-        ios: IosSounds.alarm,
-        looping: true,
-        volume: 1,
-        asAlarm: true,
-      );
+      if(tonePath==null) {
+        Future.delayed(Duration(milliseconds: 300), () {
+          FlutterRingtonePlayer().play(
+            android: AndroidSounds.alarm,
+            ios: IosSounds.alarm,
+            looping: true,
+            volume: 1,
+            asAlarm: true,
+          );
+        });
+      }
+      else{
+        Future.delayed(Duration(milliseconds: 300), () {
+          FlutterRingtonePlayer().play(
+            fromFile: tonePath,
+            ios: IosSounds.alarm,
+            looping: true,
+            volume: 1,
+            asAlarm: true,
+          );
+        });
+
+      }
     }
     print("Alarm triggered in the BG ${alarmId}");
 
@@ -80,83 +105,6 @@ void alarmCallBack(int id, Map<String, dynamic> params) async {
     print("Error failed $e");
   }
 }
-
-
-// @pragma('vm:entry-point')
-// void alarmCallBack(int id, Map<String, dynamic> params) async {
-//   try {
-//     print("Alarm Isolate: ${Isolate.current.hashCode}");
-//
-//     final int? alarmId = params['alarmId'];
-//
-//     if (alarmId == null) return;
-//
-//     await initHive();
-//     final AlarmRepository repository = await AlarmRepository.init();
-//     final Alarm? alarm = repository.getAlarmById(alarmId);
-//
-//     print("From hive $alarm");
-//     if (alarm == null) return;
-//
-//     final String? tonePath = alarm.ringTonePath?.tonePath;
-//
-//     final portName = 'alarm_command_channel_$alarmId';
-//     IsolateNameServer.removePortNameMapping(portName);
-//     final receivePort = ReceivePort();
-//     IsolateNameServer.registerPortWithName(receivePort.sendPort, portName);
-//
-//     if (!alarm.isAlarm) {
-//       FlutterRingtonePlayer().play(
-//         fromFile: tonePath,
-//         ios: IosSounds.alarm,
-//         looping: true,
-//         volume: 1,
-//         asAlarm: true,
-//       );
-//     } else {
-//       FlutterRingtonePlayer().play(
-//         android: AndroidSounds.alarm,
-//         ios: IosSounds.alarm,
-//         looping: true,
-//         volume: 1,
-//         asAlarm: true,
-//       );
-//     }
-//     print("Alarm triggered in the BG ${alarmId}");
-//
-//     // final mainIsolatePort =
-//     // IsolateNameServer.lookupPortByName('alarm_event_channel');
-//     // mainIsolatePort?.send({'type': 'alarm_started', 'alarmId': alarmId});
-//     //
-//     // bool stopped = false;
-//     // await receivePort.timeout(
-//     //   const Duration(seconds: 60),
-//     //   onTimeout: (sink) {
-//     //     print("[Timeout] Auto-stopping alarm.");
-//     //     FlutterRingtonePlayer().stop();
-//     //     receivePort.close();
-//     //     IsolateNameServer.removePortNameMapping(portName);
-//     //     stopped = true;
-//     //   },
-//     // ).forEach((msg) {
-//     //   if (msg == 'stop_alarm') {
-//     //     print("[Message] Stop alarm command received.");
-//     //     FlutterRingtonePlayer().stop();
-//     //     receivePort.close();
-//     //     IsolateNameServer.removePortNameMapping(portName);
-//     //     stopped = true;
-//     //   }
-//     //   print(
-//     //       "[EXIT] alarmId $alarmId isolate completed, msg $msg port $portName");
-//     // // });
-//     //
-//     // print("Alarm ID: $alarmId, isAlarm: ${alarm.isAlarm}, tonePath: ${alarm
-//     //     .ringTonePath?.tonePath}");
-//
-//   }catch(e){
-//     print("Error failed $e");
-//   }
-// }
 
 Future<void> setAlarmAt(Alarm newAlarm) async {
   _scheduleAlarmInstances(newAlarm);
