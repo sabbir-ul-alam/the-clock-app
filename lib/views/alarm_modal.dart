@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'dart:math';
-import 'package:intl/intl.dart';
 import '../viewmodels/alarm_viewmodel.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../models/alarm.dart';
 import 'ringtone_picker_modal.dart';
 import '../services/ringtone_picker_service.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 class AlarmModal extends StatefulWidget {
   Alarm? alarm;
@@ -47,9 +47,10 @@ class AlarmModalState extends State<AlarmModal> {
   void _loadLastSelectedTone() async {
     final lastTone = await RingtonePickerService.getLastSelectedTone();
     if (lastTone != null) {
-      setState(() {
-        selectedTone = RingTone(lastTone['name']!, lastTone['uri']!);
-      });
+      // setState(() {
+      //   selectedTone = RingTone(lastTone['name']!, lastTone['uri']!);
+      // });
+      selectedTone = RingTone(lastTone['name']!, lastTone['uri']!);
     }
   }
 
@@ -136,14 +137,21 @@ class AlarmModalState extends State<AlarmModal> {
                   );
 
                   if (selected != null) {
-                    setState(() {
-                      selectedTone =
+                    // setState(() {
+                    //   selectedTone =
+                    //       RingTone(selected['name']!, selected['uri']!);
+                    // });
+                    selectedTone =
                           RingTone(selected['name']!, selected['uri']!);
-                    });
                     // Optionally save to SharedPreferences for future default use
-                  }else {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text("No ringtone selected")),
+                  }else if(selectedTone==null){
+                    Fluttertoast.showToast(
+                      msg: "No ringtone selected",
+                      toastLength: Toast.LENGTH_SHORT,
+                      gravity: ToastGravity.BOTTOM,
+                      backgroundColor: Colors.black87,
+                      textColor: Colors.white,
+                      fontSize: 14.0,
                     );
                   }
 

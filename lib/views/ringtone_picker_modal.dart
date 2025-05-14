@@ -18,7 +18,9 @@ class _RingtonePickerModalState extends State<RingtonePickerModal> {
   @override
   void initState() {
     super.initState();
-    _fetchRingtones();
+    Future.delayed(Duration(milliseconds: 200), () {
+      _fetchRingtones();
+    });
   }
 
   void _fetchRingtones() async {
@@ -71,9 +73,13 @@ class _RingtonePickerModalState extends State<RingtonePickerModal> {
   @override
   Widget build(BuildContext context) {
     return SafeArea(
-      child: _loading
-          ? Center(child: CircularProgressIndicator())
-          : Container(
+      // child: _loading
+      //     ? Center(
+      //     child: CircularProgressIndicator(
+      //       backgroundColor: Colors.grey[50],
+      //       color: Colors.grey[350],
+      //     ))
+          child : Container(
           color: Colors.grey[50],
               child: Column(
               mainAxisSize: MainAxisSize.min,

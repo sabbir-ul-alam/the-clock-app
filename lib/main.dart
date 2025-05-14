@@ -6,10 +6,15 @@ import 'viewmodels/alarm_viewmodel.dart';
 import 'package:android_alarm_manager_plus/android_alarm_manager_plus.dart';
 import 'services/alarm_service.dart';
 import 'services/notification_service.dart';
+import 'package:flutter/services.dart';
 
 
 void main() async{
   WidgetsFlutterBinding.ensureInitialized();
+  await SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown, // Optional, allows upside-down
+  ]);
   initTimeZone();
   await initHive();
   await AlarmViewmodel().initHiveRepo();

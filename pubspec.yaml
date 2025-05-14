@@ -46,6 +46,8 @@ dependencies:
   device_info_plus: ^10.1.0
   flutter_local_notifications: ^19.2.0
   shared_preferences: ^2.5.3
+  fluttertoast: ^8.2.2
+
 
 
 
