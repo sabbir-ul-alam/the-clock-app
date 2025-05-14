@@ -154,7 +154,7 @@ Future<void> _scheduleAlarmInstances(Alarm alarm) async {
       rescheduleOnReboot: true,
       params: {
         'alarmId': alarm.id,
-        'ringTonePath': alarm.ringTonePath!.tonePath,
+        'ringTonePath': alarm.ringTonePath?.tonePath,
         'isAlarm': alarm.isAlarm
       },
     );

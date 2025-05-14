@@ -8,7 +8,9 @@ class SeachCities extends StatelessWidget{
   @override
   Widget build( BuildContext context){
     return Scaffold(
+      backgroundColor: Colors.grey[50],
       appBar: AppBar(
+        backgroundColor: Colors.grey[50],
         leading: BackButton(
           onPressed: () => Navigator.pop(context)
         ),
@@ -17,6 +19,7 @@ class SeachCities extends StatelessWidget{
 
       ),
       body: SearchDbWhileTyping(),
+
     );
   }
 
@@ -60,16 +63,19 @@ class _SearchDbWhileTypingSate extends State<SearchDbWhileTyping>{
   @override
   Widget build(BuildContext context){
     return Scaffold(
+      backgroundColor: Colors.grey[50],
       body: Column(
         children: [
             TextField(
-
               decoration: InputDecoration(
                   hintText: 'Enter the name of a city',
                   contentPadding: EdgeInsets.all(20),
-
+                focusedBorder: UnderlineInputBorder(
+                  borderSide: BorderSide(
+                    color: Colors.grey
+                  )
+                )
               ),
-
 
               controller: searchController,
             ),

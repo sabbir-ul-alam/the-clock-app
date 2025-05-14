@@ -19,7 +19,6 @@ class _RingtonePickerModalState extends State<RingtonePickerModal> {
   void initState() {
     super.initState();
     _fetchRingtones();
-
   }
 
   void _fetchRingtones() async {
@@ -57,11 +56,12 @@ class _RingtonePickerModalState extends State<RingtonePickerModal> {
 
   void _confirmSelection() {
     final selected = _ringtones.firstWhere(
-          (tone) => tone['uri'] == _selectedUri,
+      (tone) => tone['uri'] == _selectedUri,
       orElse: () => {},
     );
     if (selected.containsKey('name') && selected.containsKey('uri')) {
-      RingtonePickerService.saveLastSelectedTone(selected['name']!, selected['uri']!);
+      RingtonePickerService.saveLastSelectedTone(
+          selected['name']!, selected['uri']!);
     }
 
     _stopTone();
@@ -73,47 +73,54 @@ class _RingtonePickerModalState extends State<RingtonePickerModal> {
     return SafeArea(
       child: _loading
           ? Center(child: CircularProgressIndicator())
-          : Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Text("Choose Alarm Tone",
-                    style: TextStyle(
-                        fontSize: 18, fontWeight: FontWeight.bold)),
-              ),
-              if (_selectedUri != null)
-                TextButton(
-                  onPressed: _confirmSelection,
-                  child: Text("OK"),
-                )
-            ],
-          ),
-          Divider(),
-          Expanded(
-            child: ListView.builder(
-              itemCount: _ringtones.length,
-              itemBuilder: (context, index) {
-                final tone = _ringtones[index];
-                final isSelected = (_selectedUri == tone['uri']);
-                return ListTile(
-                  leading: Icon(Icons.music_note),
-                  title: Text(tone['name'] ?? 'Unnamed'),
-                  trailing: isSelected ? Icon(Icons.check, color: Colors.green) : null,
-                  onTap: () {
-                    _stopTone();
-                    setState(() => _selectedUri = tone['uri']);
-                    _playTone(tone['uri']!);
-                  },
-                );
-              },
-            ),
-          ),
-        ],
-      ),
+          : Container(
+          color: Colors.grey[50],
+              child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Text("Choose Alarm Tone",
+                          style: TextStyle(
+                              fontSize: 18, fontWeight: FontWeight.bold)),
+                    ),
+                    if (_selectedUri != null)
+                      TextButton(
+                        onPressed: _confirmSelection,
+                        child: Text("OK"),
+                      )
+                  ],
+                ),
+                Divider(
+                  color: Colors.grey[350],
+                ),
+                Expanded(
+                  child: ListView.builder(
+                    itemCount: _ringtones.length,
+                    itemBuilder: (context, index) {
+                      final tone = _ringtones[index];
+                      final isSelected = (_selectedUri == tone['uri']);
+                      return ListTile(
+                        tileColor: Colors.grey[50],
+                        leading: Icon(Icons.music_note),
+                        title: Text(tone['name'] ?? 'Unnamed'),
+                        trailing: isSelected
+                            ? Icon(Icons.check, color: Colors.green)
+                            : null,
+                        onTap: () {
+                          _stopTone();
+                          setState(() => _selectedUri = tone['uri']);
+                          _playTone(tone['uri']!);
+                        },
+                      );
+                    },
+                  ),
+                ),
+              ],
+            )),
     );
   }
 

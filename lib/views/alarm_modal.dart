@@ -76,7 +76,7 @@ class AlarmModalState extends State<AlarmModal> {
 
   void saveAlarm() {
     DateTime alarmTime = _getTime(hour, minute, isAM);
-    alarmViewmodel.saveNewAlarm(alarmTime, selectedDays, isAlarm, selectedTone!);
+    alarmViewmodel.saveNewAlarm(alarmTime, selectedDays, isAlarm, tone: selectedTone);
   }
 
   void updateAlarm(Alarm alarm) {

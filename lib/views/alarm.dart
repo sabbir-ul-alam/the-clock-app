@@ -37,22 +37,25 @@ class AlarmTabState extends State<AlarmTab> {
     // });
 
     return LayoutBuilder(builder: (context, constraints) {
+
       final totalHeight = constraints.maxHeight;
       final topHeight = totalHeight * _dividerPosition;
       final bottomHeight = totalHeight * (1 - _dividerPosition) - 8;
       return Column(
+
         children: [
           SizedBox(
               height: topHeight,
               child: Stack(
                 children: [
                   Container(
+
                     margin:
                         const EdgeInsets.all(8.0), // acts like outer padding
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(16),
                       border: Border.all(color: Colors.black),
-                      // color: Colors.grey[300],
+                      color: Colors.grey[50],
                       // color: Theme.of(context).scaffoldBackgroundColor
                     ),
                     clipBehavior: Clip.antiAlias,
@@ -93,7 +96,7 @@ class AlarmTabState extends State<AlarmTab> {
                 width: 60,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: Colors.black38,
+                  color: Colors.grey[400],
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -109,7 +112,7 @@ class AlarmTabState extends State<AlarmTab> {
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(16),
                       border: Border.all(color: Colors.black),
-                      color: Theme.of(context).scaffoldBackgroundColor,
+                      color: Colors.grey[50]
                     ),
                     clipBehavior: Clip.antiAlias,
                     child: CategoryContainer(
@@ -173,6 +176,10 @@ class CategoryContainer extends StatelessWidget {
       listenable: alarmViewmodel,
       builder: (context, child) {
         return ListView.builder(
+          // margin: const EdgeInsets.symmetric(
+          //     horizontal: 12, vertical: 6),
+          // padding: const EdgeInsets.symmetric(horizontal: 12),
+
           itemCount: alarmViewmodel.listOfAlarm.length,
           itemBuilder: (context, index) {
             final alarm = alarmViewmodel.listOfAlarm[index];
@@ -181,98 +188,125 @@ class CategoryContainer extends StatelessWidget {
             } else if (!alarm.isAlarm! && category != 'Prayer') {
               return SizedBox.shrink();
             }
-            final String iconPath;
-            if (alarm.isEnabled ?? false) {
-              iconPath = 'assets/icons/check.svg';
-            } else {
-              iconPath = 'assets/icons/cross.svg';
-            }
-            return InkWell(
-              onTap: () => _showTimePickerDialog(context, alarm),
-              child: Container(
-                margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Colors.grey[200],
-                  borderRadius: BorderRadius.circular(32),
-                ),
-                child: Row(
-                  // mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    // Toggle button (check / cross)
-                    GestureDetector(
-                      onTap: () {
-                        if (alarm.isEnabled ?? true) {
-                          alarm.isEnabled = false;
-                        } else {
-                          alarm.isEnabled = true;
-                        }
-                        alarmViewmodel.updateAlarm(alarm);
-                      },
-                      child: Container(
-                        width: 48,
-                        height: 48,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Colors.white,
-                          boxShadow: [
-                            BoxShadow(
-                                color: Colors.black26,
-                                blurRadius: 4,
-                                offset: Offset(2, 2)),
-                          ],
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: SvgPicture.asset(iconPath),
-                        ),
+            final String iconPath = (alarm.isEnabled ?? false)
+                ? 'assets/icons/check.svg'
+                : 'assets/icons/cross.svg';
+
+            return Container(
+              margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(32),
+              ),
+              clipBehavior: Clip.antiAlias,
+              child: Dismissible(
+                key: Key(alarm.id.toString()),
+                direction: DismissDirection.endToStart,
+                background: Container(
+                  color: Colors.grey,
+
+                  alignment: Alignment.centerRight,
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: const [
+                      Icon(Icons.delete, color: Colors.red),
+                      SizedBox(width: 8),
+                      Text('Delete',
+                          style: TextStyle(
+                              color: Colors.white,
+                              ),
                       ),
-                    ),
-                    // Time display
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Text(
-                            DateFormat('hh:mm a').format(alarm.alarmTime),
-                            style: const TextStyle(
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
+                    ],
+                  ),
+                ),
+                onDismissed: (direction) {
+                  //delete code here
+                  alarmViewmodel.deleteAlarm(alarm);
+                },
+                child: InkWell(
+                  onTap: () => _showTimePickerDialog(context, alarm),
+                  child: Container(
+                    padding: const EdgeInsets.all(12),
+                    color: Colors.grey[200],
+                    child: Row(
+                      children: [
+                        GestureDetector(
+                          onTap: () {
+                            if (alarm.isEnabled ?? true) {
+                              alarm.isEnabled = false;
+                            } else {
+                              alarm.isEnabled = true;
+                            }
+                            alarmViewmodel.updateAlarm(alarm);
+                          },
+                          child: Container(
+                            width: 48,
+                            height: 48,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: Colors.white,
+                              boxShadow: [
+                                BoxShadow(
+                                    color: Colors.black26,
+                                    blurRadius: 4,
+                                    offset: Offset(2, 2)),
+                              ],
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: SvgPicture.asset(iconPath),
                             ),
                           ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: ['S', 'M', 'T', 'W', 'T', 'F', 'S']
-                                .asMap()
-                                .entries
-                                .map((entry) {
-                              int index = entry.key;
-                              String day = entry.value;
-                              // final isActive = alarm.listOfDays!.contains(day);
-                              final isActiveDay = alarmViewmodel.containsDay(
-                                  alarm.listOfDays!, index);
-                              return Container(
-                                margin: EdgeInsets.symmetric(horizontal: 2),
-                                width: 28,
-                                height: 28,
-                                decoration: BoxDecoration(
-                                  color: isActiveDay
-                                      ? Colors.grey
-                                      : Colors.grey[350],
-                                  shape: BoxShape.circle,
+                        ),
+                        // Time display
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Text(
+                                DateFormat('hh:mm a').format(alarm.alarmTime),
+                                style: const TextStyle(
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.bold,
                                 ),
-                                alignment: Alignment.center,
-                                child: Text(
-                                  day,
-                                  style: const TextStyle(color: Colors.white),
-                                ),
-                              );
-                            }).toList(),
-                          )
-                        ],
-                      ),
+                              ),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: ['S', 'M', 'T', 'W', 'T', 'F', 'S']
+                                    .asMap()
+                                    .entries
+                                    .map((entry) {
+                                  int index = entry.key;
+                                  String day = entry.value;
+                                  // final isActive = alarm.listOfDays!.contains(day);
+                                  final isActiveDay = alarmViewmodel
+                                      .containsDay(alarm.listOfDays!, index);
+                                  return Container(
+                                    margin: EdgeInsets.symmetric(horizontal: 2),
+                                    width: 28,
+                                    height: 28,
+                                    decoration: BoxDecoration(
+                                      color: isActiveDay
+                                          ? Colors.grey
+                                          : Colors.grey[350],
+                                      shape: BoxShape.circle,
+                                    ),
+                                    alignment: Alignment.center,
+                                    child: Text(
+                                      day,
+                                      style:
+                                          const TextStyle(color: Colors.white),
+                                    ),
+                                  );
+                                }).toList(),
+                              )
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
+                  ),
                 ),
               ),
             );

@@ -38,13 +38,6 @@ class AlarmViewmodel extends ChangeNotifier{
       }
     }
 
-    //if no specific days is selected that means all days is selected
-    // if (days.isEmpty){
-    //   for(int ind = 0;ind<7;ind++){
-    //     days.add(Day.values[ind]);
-    //   }
-    // }
-
     return days;
   }
 
@@ -69,12 +62,11 @@ class AlarmViewmodel extends ChangeNotifier{
   }
 
 
-
-  void saveNewAlarm(DateTime alarm,  List<bool> selectedDays, bool isAlarm, RingTone tone) async{
+  void saveNewAlarm(DateTime alarm,  List<bool> selectedDays, bool isAlarm, {RingTone? tone}) async{
     //   this.id should be generated on the repo before saving
     //other fields should be update with updateAlarm method
     DateTime alarmTime = alarm;
-    RingTone alarmTone = isAlarm? tone : await getPrayerTone(alarmTime);
+    RingTone? alarmTone = isAlarm? tone : await getPrayerTone(alarmTime);
     List<Day> days = convertToDayEnums(selectedDays);
     Alarm newAlarm = Alarm(
       alarmTime: alarmTime,
@@ -102,6 +94,14 @@ class AlarmViewmodel extends ChangeNotifier{
     }
 
     // notifyListeners();
+
+  }
+
+  void deleteAlarm(Alarm alarm){
+    // _alarmRepository.deleteAlarmWithIndex(alarm.id);
+    _alarmRepository.deleteAlarm(alarm);
+    listOfAlarm.remove(alarm);
+    notifyListeners();
 
   }
   
