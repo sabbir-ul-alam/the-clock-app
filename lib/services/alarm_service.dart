@@ -23,6 +23,7 @@ void alarmCallBack(int id, Map<String, dynamic> params) async {
 
     if (alarmId == null) return;
 
+    //attempt to solve the distorted alarm sound at the beginning
     FlutterRingtonePlayer().play(
       android: AndroidSounds.notification,
       volume: 0.0,
@@ -155,7 +156,8 @@ Future<void> _scheduleAlarmInstances(Alarm alarm) async {
       params: {
         'alarmId': alarm.id,
         'ringTonePath': alarm.ringTonePath?.tonePath,
-        'isAlarm': alarm.isAlarm
+        'isAlarm': alarm.isAlarm,
+        'listOfDays': alarm.listOfDays
       },
     );
   } else {
@@ -175,7 +177,8 @@ Future<void> _scheduleAlarmInstances(Alarm alarm) async {
         params: {
           'alarmId': alarm.id,
           'ringTonePath': alarm.ringTonePath!.tonePath,
-          'isAlarm': alarm.isAlarm
+          'isAlarm': alarm.isAlarm,
+          'listOfDays': alarm.listOfDays
         },
       );
     }
