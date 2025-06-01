@@ -15,12 +15,13 @@ import 'dart:ui';
 @pragma('vm:entry-point')
 void alarmCallBack(int id, Map<String, dynamic> params) async {
   try {
+
     print("Alarm Isolate: ${Isolate.current.hashCode}");
 
     final int? alarmId = params['alarmId'];
     final String? tonePath = params['ringTonePath'];
     bool isAlarm = params["isAlarm"];
-    List<Day> listOfDays = params["listOfDays"];
+    bool repeat = params["repeatWeekly"];
 
     if (alarmId == null) return;
 
@@ -101,11 +102,41 @@ void alarmCallBack(int id, Map<String, dynamic> params) async {
     });
 
     print("Alarm ID: $alarmId, isAlarm: ${isAlarm}, tonePath: ${tonePath}");
-    print("Alarm ID: $alarmId");
 
+    if(repeat){
+      final DateTime originalScheduledTime = DateTime.parse(params['scheduledTime']);
+      final nextWeek = getNextValidDateTime(originalScheduledTime);
+      await AndroidAlarmManager.oneShotAt(
+        nextWeek,
+        id,
+        alarmCallBack,
+        alarmClock: true,
+        allowWhileIdle: true,
+        exact: true,
+        wakeup: true,
+        rescheduleOnReboot: true,
+        params: {
+          'alarmId': alarmId,
+          'ringTonePath': tonePath,
+          'isAlarm': isAlarm,
+          'repeatWeekly': true,
+          // 'originalTime': nextWeek.toIso8601String(),
+          'scheduledTime': nextWeek.toIso8601String(),
+
+        },
+      );
+
+    }
   }catch(e){
     print("Error failed $e");
   }
+}
+DateTime getNextValidDateTime(DateTime original) {
+  final now = DateTime.now();
+  while (original.isBefore(now)) {
+    original = original.add(Duration(days: 7));
+  }
+  return original;
 }
 
 Future<void> setAlarmAt(Alarm newAlarm) async {
@@ -161,6 +192,8 @@ Future<void> _scheduleAlarmInstances(Alarm alarm) async {
         'ringTonePath': alarm.ringTonePath?.tonePath,
         'isAlarm': alarm.isAlarm,
         'repeatWeekly': true,
+        'scheduledTime': targetTime.toIso8601String(),
+
       },
     );
   } else {
@@ -184,6 +217,7 @@ Future<void> _scheduleAlarmInstances(Alarm alarm) async {
           'ringTonePath': alarm.ringTonePath!.tonePath,
           'isAlarm': alarm.isAlarm,
           'repeatWeekly': true,
+          'scheduledTime': nextTime.toIso8601String(),
         },
       );
     }
