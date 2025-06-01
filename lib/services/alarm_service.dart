@@ -20,6 +20,7 @@ void alarmCallBack(int id, Map<String, dynamic> params) async {
     final int? alarmId = params['alarmId'];
     final String? tonePath = params['ringTonePath'];
     bool isAlarm = params["isAlarm"];
+    List<Day> listOfDays = params["listOfDays"];
 
     if (alarmId == null) return;
 
@@ -151,13 +152,15 @@ Future<void> _scheduleAlarmInstances(Alarm alarm) async {
       alarm.id,
       alarmCallBack,
       alarmClock: true,
+      allowWhileIdle: true,
+      exact: true,
       wakeup: true,
       rescheduleOnReboot: true,
       params: {
         'alarmId': alarm.id,
         'ringTonePath': alarm.ringTonePath?.tonePath,
         'isAlarm': alarm.isAlarm,
-        'listOfDays': alarm.listOfDays
+        'repeatWeekly': true,
       },
     );
   } else {
@@ -172,13 +175,15 @@ Future<void> _scheduleAlarmInstances(Alarm alarm) async {
         uniqueId,
         alarmCallBack,
         alarmClock: true,
+        allowWhileIdle: true,
+        exact: true,
         wakeup: true,
         rescheduleOnReboot: true,
         params: {
           'alarmId': alarm.id,
           'ringTonePath': alarm.ringTonePath!.tonePath,
           'isAlarm': alarm.isAlarm,
-          'listOfDays': alarm.listOfDays
+          'repeatWeekly': true,
         },
       );
     }
