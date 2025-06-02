@@ -45,7 +45,7 @@ Future<void> ensureExactAlarmPermission(BuildContext context) async {
 
   // Now check notification permission (Android 13+)
   final notificationStatus = await Permission.notification.status;
-  LoggerService.debug('Notification Permission: $notificationStatus');
+  // LoggerService.debug('Notification Permission: $notificationStatus');
 
   if (!notificationStatus.isGranted) {
     if (!context.mounted) return;

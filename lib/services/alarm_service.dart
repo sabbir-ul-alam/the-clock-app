@@ -15,19 +15,28 @@ import 'dart:ui';
 @pragma('vm:entry-point')
 void alarmCallBack(int id, Map<String, dynamic> params) async {
   try {
-
     print("Alarm Isolate: ${Isolate.current.hashCode}");
 
-    final int? alarmId = params['alarmId'];
+    final int? alarmId = id;
     final String? tonePath = params['ringTonePath'];
     bool isAlarm = params["isAlarm"];
     bool repeat = params["repeatWeekly"];
 
     if (alarmId == null) return;
+    //
+    // const platform = MethodChannel('alarm_notification');
+    // try {
+    //   await platform.invokeMethod('scheduleNativeAlarm', {
+    //     'alarmTimeMillis': DateTime.now().millisecondsSinceEpoch,
+    //   });
+    // } catch (e) {
+    //   print("Failed to schedule native alarm: $e");
+    // }
 
     //attempt to solve the distorted alarm sound at the beginning
     FlutterRingtonePlayer().play(
       android: AndroidSounds.notification,
+      ios: IosSounds.alarm,
       volume: 0.0,
       asAlarm: true,
       looping: false, // important: don't loop
@@ -38,8 +47,13 @@ void alarmCallBack(int id, Map<String, dynamic> params) async {
     final receivePort = ReceivePort();
     IsolateNameServer.registerPortWithName(receivePort.sendPort, portName);
 
+    final mainIsolatePort =
+    IsolateNameServer.lookupPortByName('alarm_event_channel');
+    mainIsolatePort?.send({'type': 'alarm_started', 'alarmId': alarmId});
+
     if (!isAlarm) {
       Future.delayed(Duration(milliseconds: 300), () {
+        FlutterRingtonePlayer().stop();
         FlutterRingtonePlayer().play(
           fromFile: tonePath,
           ios: IosSounds.alarm,
@@ -51,6 +65,7 @@ void alarmCallBack(int id, Map<String, dynamic> params) async {
     } else {
       if(tonePath==null) {
         Future.delayed(Duration(milliseconds: 300), () {
+          FlutterRingtonePlayer().stop();
           FlutterRingtonePlayer().play(
             android: AndroidSounds.alarm,
             ios: IosSounds.alarm,
@@ -62,6 +77,7 @@ void alarmCallBack(int id, Map<String, dynamic> params) async {
       }
       else{
         Future.delayed(Duration(milliseconds: 300), () {
+          FlutterRingtonePlayer().stop();
           FlutterRingtonePlayer().play(
             fromFile: tonePath,
             ios: IosSounds.alarm,
@@ -73,12 +89,33 @@ void alarmCallBack(int id, Map<String, dynamic> params) async {
 
       }
     }
-    print("Alarm triggered in the BG ${alarmId}");
+    LoggerService.debug("Alarm triggered in the BG ${alarmId}");
 
-    final mainIsolatePort =
-    IsolateNameServer.lookupPortByName('alarm_event_channel');
-    mainIsolatePort?.send({'type': 'alarm_started', 'alarmId': alarmId});
+    print("Alarm ID: $alarmId, isAlarm: ${isAlarm}, tonePath: ${tonePath}");
 
+    if(repeat){
+      await initNotificationService();
+      final DateTime originalScheduledTime = DateTime.parse(params['scheduledTime']);
+      final nextWeek = getNextValidDateTime(originalScheduledTime);
+      await AndroidAlarmManager.oneShotAt(
+        nextWeek,
+        id,
+        alarmCallBack,
+        alarmClock: true,
+        allowWhileIdle: true,
+        exact: true,
+        wakeup: true,
+        rescheduleOnReboot: true,
+        params: {
+          'alarmId': params['alarmId'],
+          'ringTonePath': tonePath,
+          'isAlarm': isAlarm,
+          'repeatWeekly': true,
+          'scheduledTime': nextWeek.toIso8601String(),
+
+        },
+      );
+    }
     bool stopped = false;
     await receivePort.timeout(
       const Duration(seconds: 60),
@@ -97,46 +134,21 @@ void alarmCallBack(int id, Map<String, dynamic> params) async {
         IsolateNameServer.removePortNameMapping(portName);
         stopped = true;
       }
-      print(
+      LoggerService.debug(
           "[EXIT] alarmId $alarmId isolate completed, msg $msg port $portName");
     });
-
-    print("Alarm ID: $alarmId, isAlarm: ${isAlarm}, tonePath: ${tonePath}");
-
-    if(repeat){
-      final DateTime originalScheduledTime = DateTime.parse(params['scheduledTime']);
-      final nextWeek = getNextValidDateTime(originalScheduledTime);
-      await AndroidAlarmManager.oneShotAt(
-        nextWeek,
-        id,
-        alarmCallBack,
-        alarmClock: true,
-        allowWhileIdle: true,
-        exact: true,
-        wakeup: true,
-        rescheduleOnReboot: true,
-        params: {
-          'alarmId': alarmId,
-          'ringTonePath': tonePath,
-          'isAlarm': isAlarm,
-          'repeatWeekly': true,
-          // 'originalTime': nextWeek.toIso8601String(),
-          'scheduledTime': nextWeek.toIso8601String(),
-
-        },
-      );
-
-    }
   }catch(e){
     print("Error failed $e");
   }
 }
+
+
 DateTime getNextValidDateTime(DateTime original) {
   final now = DateTime.now();
   while (original.isBefore(now)) {
     // original = original.add(Duration(days: 7));
     //for testing
-    original = original.add(Duration(minutes: 5));
+    original = original.add(Duration(minutes: 2));
   }
   return original;
 }
@@ -148,25 +160,29 @@ Future<void> setAlarmAt(Alarm newAlarm) async {
 Future<void> cancelSetAlarm(int baseId, {List<Day>? days}) async {
   if (days == null || days.isEmpty) {
     await AndroidAlarmManager.cancel(baseId);
-    print("One-time alarm cancelled (ID: $baseId)");
+    LoggerService.debug("One-time alarm cancelled (ID: $baseId)");
   } else {
     for (Day d in days) {
       final recurringId = baseId * 10 + d.dayNumber;
       await AndroidAlarmManager.cancel(recurringId);
-      print("Recurring alarm cancelled (ID: $recurringId)");
+      LoggerService.debug("Recurring alarm cancelled (ID: $recurringId)");
     }
   }
 }
 
 DateTime _nextDateForWeekday(DateTime alarmTime, int targetDay) {
-  if (targetDay == 0) targetDay = 7; // for sunday is 7
+  if (targetDay == 0) {targetDay = 7;} // for sunday is 7
   // final now = DateTime.now();
   // final today = now.weekday % 7;
   // final diff = (targetDay - today + 7) % 7;
   final today = DateTime.now().weekday;
   DateTime scheduledDay = DateTime.now();
   if(today==targetDay){
-    scheduledDay = scheduledDay.add(Duration(days: 7));
+    scheduledDay = alarmTime.isBefore(scheduledDay)
+        ? scheduledDay.add(Duration(days: 7))
+        : scheduledDay;
+
+    // scheduledDay = scheduledDay.add(Duration(days: 7));
   }
   else if(today<targetDay){
     scheduledDay = scheduledDay.add(Duration(days: (targetDay-today)));
@@ -216,6 +232,8 @@ Future<void> _scheduleAlarmInstances(Alarm alarm) async {
 
       LoggerService.debug(nextTime.toString());
 
+      // LoggerService.debug(nextTime.toIso8601String());
+
       await AndroidAlarmManager.oneShotAt(
         nextTime,
         uniqueId,
@@ -227,7 +245,7 @@ Future<void> _scheduleAlarmInstances(Alarm alarm) async {
         rescheduleOnReboot: true,
         params: {
           'alarmId': alarm.id,
-          'ringTonePath': alarm.ringTonePath!.tonePath,
+          'ringTonePath': alarm.ringTonePath?.tonePath,
           'isAlarm': alarm.isAlarm,
           'repeatWeekly': true,
           'scheduledTime': nextTime.toIso8601String(),

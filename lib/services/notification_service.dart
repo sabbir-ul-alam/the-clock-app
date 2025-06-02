@@ -38,7 +38,7 @@ void _startAlarmEventListener() {
 
   receivePort.listen((msg) async {
     if (msg is Map && msg['type'] == 'alarm_started') {
-      final alarmId = msg['alarmId'] ?? 999;
+      final alarmId = msg['alarmId'];
       await showAlarmNotification(alarmId);
     }
   });
