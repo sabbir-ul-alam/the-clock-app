@@ -134,7 +134,9 @@ void alarmCallBack(int id, Map<String, dynamic> params) async {
 DateTime getNextValidDateTime(DateTime original) {
   final now = DateTime.now();
   while (original.isBefore(now)) {
-    original = original.add(Duration(days: 7));
+    // original = original.add(Duration(days: 7));
+    //for testing
+    original = original.add(Duration(minutes: 5));
   }
   return original;
 }
@@ -156,17 +158,28 @@ Future<void> cancelSetAlarm(int baseId, {List<Day>? days}) async {
   }
 }
 
-DateTime _nextDateForWeekday(DateTime time, int targetDay) {
-  final now = DateTime.now();
-  final today = now.weekday % 7;
-  final diff = (targetDay - today + 7) % 7;
-  final scheduledDay = now.add(Duration(days: diff));
+DateTime _nextDateForWeekday(DateTime alarmTime, int targetDay) {
+  if (targetDay == 0) targetDay = 7; // for sunday is 7
+  // final now = DateTime.now();
+  // final today = now.weekday % 7;
+  // final diff = (targetDay - today + 7) % 7;
+  final today = DateTime.now().weekday;
+  DateTime scheduledDay = DateTime.now();
+  if(today==targetDay){
+    scheduledDay = scheduledDay.add(Duration(days: 7));
+  }
+  else if(today<targetDay){
+    scheduledDay = scheduledDay.add(Duration(days: (targetDay-today)));
+  }
+  else{
+    scheduledDay = scheduledDay.add(Duration(days: (7 +targetDay-today)));
+  }
   return DateTime(
     scheduledDay.year,
     scheduledDay.month,
     scheduledDay.day,
-    time.hour,
-    time.minute,
+    alarmTime.hour,
+    alarmTime.minute,
   );
 }
 
@@ -191,7 +204,7 @@ Future<void> _scheduleAlarmInstances(Alarm alarm) async {
         'alarmId': alarm.id,
         'ringTonePath': alarm.ringTonePath?.tonePath,
         'isAlarm': alarm.isAlarm,
-        'repeatWeekly': true,
+        'repeatWeekly': false,
         'scheduledTime': targetTime.toIso8601String(),
 
       },
