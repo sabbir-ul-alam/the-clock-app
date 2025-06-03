@@ -1,25 +1,31 @@
+import 'dart:ffi';
 
 class City {
-  String cityName;
-  // String? cityStateName;
-  String cityCountryName;
-  String cityTimeZone;
+  final String cityName;
+  final String cityStateName;
+  final String cityCountryName;
+  final String cityTimeZone;
   String? cityTimeOffSet;
+  final double cityLatitude;
+  final double cityLongitude;
 
   City({
     required this.cityName,
+    required this.cityStateName,
     required this.cityCountryName,
     required this.cityTimeZone,
+    required this.cityLatitude,
+    required this.cityLongitude,
     this.cityTimeOffSet,
   });
-  factory City.fromMap(Map<String,dynamic> map){
+
+  factory City.fromMap(Map<String, dynamic> map) {
     return City(
-      cityName: map['cityName'],
-      // cityStateName: map['cityStateName'],
-      cityCountryName: map['countryName'],
-      cityTimeZone: map['cityTimeZone'],
-    );
+        cityName: map['cityName'],
+        cityStateName: map['cityStateName'],
+        cityCountryName: map['countryName'],
+        cityTimeZone: map['cityTimeZone'],
+        cityLatitude: map['cityLatitude'],
+        cityLongitude: map['cityLongitude']);
   }
 }
-
-

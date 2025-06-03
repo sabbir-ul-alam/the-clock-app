@@ -14,13 +14,12 @@ class CityRepository {
     final db = await _dbHelper.database;
     final List<Map<String, dynamic>> maps = await db.rawQuery("""
       SELECT 
-      cities.id,
-      cities.name AS city_name,
-      states.name AS state_name,
-      countries.name AS country_name,
-      cities.latitude,
-      cities.longitude,
-      cities.timezone
+      cities.name AS cityName,
+      states.name AS cityStateName,
+      countries.name AS countryName,
+      cities.latitude AS cityLatitude,
+      cities.longitude AS cityLongitude,
+      cities.timezone AS cityTimeZone
       FROM ${cityTable} as cities
       JOIN ${stateTable} as states ON cities.state_id = states.id
       JOIN ${countryTable} as countries ON cities.country_id = countries.id
