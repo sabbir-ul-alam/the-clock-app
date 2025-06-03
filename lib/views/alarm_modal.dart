@@ -90,6 +90,7 @@ class AlarmModalState extends State<AlarmModal> {
     alarm.listOfDays = alarmViewmodel.convertToDayEnums(selectedDays);
     alarm.isAlarm = isAlarm;
     alarm.ringTonePath = selectedTone;
+    alarm.isEnabled = true;
 
     alarmViewmodel.updateAlarm(alarm, oldDays: oldDays);
   }

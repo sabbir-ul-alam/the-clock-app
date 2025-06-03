@@ -159,11 +159,13 @@ Future<void> setAlarmAt(Alarm newAlarm) async {
 
 Future<void> cancelSetAlarm(int baseId, {List<Day>? days}) async {
   if (days == null || days.isEmpty) {
+    FlutterRingtonePlayer().stop();
     await AndroidAlarmManager.cancel(baseId);
     LoggerService.debug("One-time alarm cancelled (ID: $baseId)");
   } else {
     for (Day d in days) {
       final recurringId = baseId * 10 + d.dayNumber;
+      FlutterRingtonePlayer().stop();
       await AndroidAlarmManager.cancel(recurringId);
       LoggerService.debug("Recurring alarm cancelled (ID: $recurringId)");
     }

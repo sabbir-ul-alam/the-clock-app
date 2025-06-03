@@ -83,8 +83,6 @@ class AlarmViewmodel extends ChangeNotifier{
 
   void updateAlarm(Alarm newAlarm, {List<Day>? oldDays} ) async{
 
-
-
     _alarmRepository.updateAlarmWithIndex(newAlarm.id, newAlarm);
     fetchAllAlarms();
 
@@ -104,7 +102,12 @@ class AlarmViewmodel extends ChangeNotifier{
 
   }
 
-  void deleteAlarm(Alarm alarm){
+  void deleteAlarm(Alarm alarm)async{
+    final rDay = (alarm.listOfDays != null)
+        ? List<Day>.from(alarm.listOfDays!.cast<Day>())
+        : <Day>[];
+    LoggerService.debug("Old day list ${rDay.toString()}");
+    await cancelSetAlarm(alarm.id, days: rDay ?? []);
     // _alarmRepository.deleteAlarmWithIndex(alarm.id);
     _alarmRepository.deleteAlarm(alarm);
     listOfAlarm.remove(alarm);

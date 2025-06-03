@@ -12,7 +12,6 @@ class City {
     required this.cityTimeZone,
     this.cityTimeOffSet,
   });
-
   factory City.fromMap(Map<String,dynamic> map){
     return City(
       cityName: map['cityName'],
@@ -21,7 +20,6 @@ class City {
       cityTimeZone: map['cityTimeZone'],
     );
   }
-
 }
 
 
