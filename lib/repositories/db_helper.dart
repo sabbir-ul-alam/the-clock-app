@@ -79,7 +79,7 @@ class DatabaseHelper{
   Future<void> createWeatherTable(Database db) async {
 
     await db.execute('''
-    CREATE TABLE IF NOT EXISTS weather_cache (
+    CREATE TABLE IF NOT EXISTS weather (
       cityId INTEGER PRIMARY KEY,
       mainTemp REAL,
       mainFeelsLike REAL,

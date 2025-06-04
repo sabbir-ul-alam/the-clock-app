@@ -1,13 +1,15 @@
 import 'package:theclockapp/utils/logger_service.dart';
 import '../models/city.dart';
 import '../models/clock_city.dart';
+import '../models/weather_model.dart';
 import 'db_helper.dart';
 
 class CityRepository {
   final String cityTable = 'cities';
   final String stateTable = 'states';
   final String countryTable = 'countries';
-  final String cityClock = 'cityclock';
+  final String cityClockTable = 'cityclock';
+  final String weatherTable = 'weather';
   final DatabaseHelper _dbHelper = DatabaseHelper();
 
   Future<List<City>> getCities(String cityName) async {
@@ -34,10 +36,26 @@ class CityRepository {
     return List.generate(maps.length, (index) => City.fromMap(maps[index]));
   }
 
-  Future<int> insertCity(CityClock clockCity) async {
+  Future<void> insertWeather(int cityId, WeatherResponse weatherData) async {
+    final db = await _dbHelper.database;
+    try{
+      final weatherMap = weatherData.toMap();
+      weatherMap['cityId'] = cityId;
+      await db.insert(weatherTable, weatherMap);
+    }
+    catch(exception){
+      LoggerService.error(exception.toString());
+    }
+
+  }
+
+    Future<int> insertCityClock(CityClock clockCity) async {
     final db = await _dbHelper.database;
     try {
-      final id = await db.insert(cityClock, clockCity.toMap());
+      final id = await db.insert(cityClockTable, clockCity.toMap());
+      if(clockCity.weatherData != null) {
+        await insertWeather(id, clockCity.weatherData!);
+      }
       return id;
     } catch (exception) {
       LoggerService.error(exception.toString());

@@ -9,7 +9,7 @@ final CityRepository cityRepository = CityRepository();
 
 bool saveClockCity(CityClock city) {
   try {
-    final id = cityRepository.insertCity(city);
+    final id = cityRepository.insertCityClock(city);
     return true;
   }
   catch (exception) {
