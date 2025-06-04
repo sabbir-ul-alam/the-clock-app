@@ -96,19 +96,16 @@ class _SearchDbWhileTypingSate extends State<SearchDbWhileTyping>{
                             border: Border(
                               bottom: BorderSide(color: Colors.grey),
                             ),
-                          
-                          
+
                         ),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Expanded(
-                                child: Text('${city.cityName},${city.cityCountryName}',
+                                child: Text('${city.cityName},${city.cityStateName}${city.cityCountryName}',
                                 overflow: TextOverflow.ellipsis,)
                             ),
                             Text('${city.cityTimeOffSet}')
-                            
-
                           ],
                         ),
                         //
