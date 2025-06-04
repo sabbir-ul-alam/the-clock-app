@@ -34,7 +34,7 @@ class CityRepository {
     return List.generate(maps.length, (index) => City.fromMap(maps[index]));
   }
 
-  Future<int> insertCity(ClockCity clockCity) async {
+  Future<int> insertCity(CityClock clockCity) async {
     final db = await _dbHelper.database;
     try {
       final id = await db.insert(cityClock, clockCity.toMap());
@@ -45,14 +45,14 @@ class CityRepository {
     }
   }
 
-  Future<List<ClockCity>> getClockCitiesFromDb() async {
+  Future<List<CityClock>> getCityClockFromDb() async {
     final db = await _dbHelper.database;
     try {
       final List<Map<String, dynamic>> maps = await db.rawQuery(
           "Select city_name as cityName, city_country_name as cityCountryName, "
           "city_timezone as cityTimeZone from cityclock;");
       return List.generate(
-          maps.length, (index) => ClockCity.fromMap(maps[index]));
+          maps.length, (index) => CityClock.fromMap(maps[index]));
     } catch (exception) {
       LoggerService.error(exception.toString());
       throw ();

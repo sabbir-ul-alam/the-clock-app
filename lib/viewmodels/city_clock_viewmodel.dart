@@ -10,12 +10,12 @@ import '../services/timezone_service.dart';
 class CityClockViewModel extends ChangeNotifier{
 
   final CityService cityService = CityService();
-  final List<ClockCity> _clockCitiList = [];
-  List<ClockCity> get clockCitiList => _clockCitiList;
+  final List<CityClock> _clockCitiList = [];
+  List<CityClock> get clockCitiList => _clockCitiList;
 
   void fetchClockCities() async{
     try {
-      List<ClockCity> clockCities = await cityService.getClockCities();
+      List<CityClock> clockCities = await cityService.getClockCities();
       _clockCitiList.clear();
       _clockCitiList.addAll(clockCities);
       notifyListeners();
@@ -25,8 +25,8 @@ class CityClockViewModel extends ChangeNotifier{
     }
   }
 
-  ClockCity convertToClockCity(City city){
-    ClockCity clockCity = ClockCity(
+  CityClock convertToClockCity(City city){
+    CityClock clockCity = CityClock(
         cityName: city.cityName,
         cityCountryName: city.cityCountryName,
         cityTimeZone: city.cityTimeZone,);

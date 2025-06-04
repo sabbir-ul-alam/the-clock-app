@@ -1,15 +1,15 @@
 class WeatherResponse {
   final Weather weather;
   final MainWeather main;
-  final DateTime timeStamp;
+  final DateTime? timeStamp;
 
-  WeatherResponse({required this.weather, required this.main, required this.timeStamp});
+  WeatherResponse({required this.weather, required this.main, this.timeStamp});
 
   factory WeatherResponse.fromJson(Map<String, dynamic> json) {
     return WeatherResponse(
       weather: Weather.fromJson(json['weather'][0]),
       main: MainWeather.fromJson(json['main']),
-      timeStamp: json['timeStamp'],
+      // timeStamp: json['timeStamp'],
     );
   }
 
@@ -18,7 +18,7 @@ class WeatherResponse {
     return {
       ...weather.toMap(),
       ...main.toMap(),
-      // 'timeStamp': DateTime.now(),
+      'timeStamp': DateTime.now().millisecondsSinceEpoch,
 
     };
   }
@@ -27,7 +27,7 @@ class WeatherResponse {
     return WeatherResponse(
       weather: Weather.fromMap(map),
       main: MainWeather.fromMap(map),
-      timeStamp: map['timeStamp'],
+      timeStamp: DateTime.fromMillisecondsSinceEpoch(map['timeStamp']),
     );
   }
 }

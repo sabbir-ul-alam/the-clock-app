@@ -7,7 +7,7 @@ class CityService{
 
 final CityRepository cityRepository = CityRepository();
 
-bool saveClockCity(ClockCity city) {
+bool saveClockCity(CityClock city) {
   try {
     final id = cityRepository.insertCity(city);
     return true;
@@ -18,8 +18,8 @@ bool saveClockCity(ClockCity city) {
   }
 }
 
-Future<List<ClockCity>> getClockCities() async{
-  final clockCities = await cityRepository.getClockCitiesFromDb();
+Future<List<CityClock>> getClockCities() async{
+  final clockCities = await cityRepository.getCityClockFromDb();
   return clockCities;
 }
 

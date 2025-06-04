@@ -1,7 +1,7 @@
 import 'weather_model.dart';
 
 
-class ClockCity {
+class CityClock {
   int? id;
   String cityName;
   String cityStateName;
@@ -13,7 +13,8 @@ class ClockCity {
   WeatherResponse? weatherData;
 
 
-  ClockCity({
+  CityClock({
+    this.id,
     required this.cityName,
     required this.cityCountryName,
     required this.cityStateName,
@@ -24,8 +25,9 @@ class ClockCity {
     this.weatherData
   });
 
-  factory ClockCity.fromMap(Map<String,dynamic> map){
-    return ClockCity(
+  factory CityClock.fromMap(Map<String,dynamic> map){
+    return CityClock(
+      id: map['id'],
       cityName: map['cityName'],
       cityStateName: map['cityStateName'],
       cityCountryName: map['cityCountryName'],
@@ -36,6 +38,7 @@ class ClockCity {
 
   Map<String, dynamic>toMap(){
     return{
+      'id': id,
       'city_name': cityName,
       'city_country_name': cityCountryName,
       'city_state_name': cityStateName,

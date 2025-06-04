@@ -40,8 +40,58 @@ class DatabaseHelper{
     return await openDatabase(
       path,
       version: 1,
+      onOpen:(db) async {
+        await createCityClockTable(db);
+        await createWeatherTable(db);
+      },
     );
 }
 
+  // 'id': id,
+  // 'city_name': cityName,
+  // 'city_country_name': cityCountryName,
+  // 'city_state_name': cityStateName,
+  // 'city_timezone':cityTimeZone,
+  Future<void> createCityClockTable(Database db) async{
+    await db.execute(
+      '''
+      CREATE TABLE IF NOT EXISTS cityclock (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      city_name TEXT,
+      city_state_name TEXT,
+      city_country_name TEXT,
+      cityTimeZone TEXT,
+      );
+      '''
+    );
+  }
 
-}
+  //
+  // 'weatherMain': main,
+  // 'weatherDescription': description,
+  // 'weatherIcon': icon,
+  // timeStamp
+  // 'mainTemp': temperature,
+  // 'mainFeelsLike': feelsLike,
+  // 'mainHumidity': humidity,
+  //
+
+  Future<void> createWeatherTable(Database db) async {
+
+    await db.execute('''
+    CREATE TABLE IF NOT EXISTS weather_cache (
+      cityId INTEGER PRIMARY KEY,
+      mainTemp REAL,
+      mainFeelsLike REAL,
+      mainHumidity REAL,
+      weatherMain TEXT,
+      weatherDescription TEXT,
+      weatherIcon TEXT,
+      timeStamp INTEGER,
+      FOREIGN KEY(cityId) REFERENCES cityclock(id) ON DELETE CASCADE
+    );'''
+    );
+  }
+
+
+  }
