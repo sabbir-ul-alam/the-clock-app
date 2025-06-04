@@ -13,8 +13,9 @@ class CityRepository {
   final DatabaseHelper _dbHelper = DatabaseHelper();
 
   Future<List<City>> getCities(String cityName) async {
-    final db = await _dbHelper.database;
-    final List<Map<String, dynamic>> maps = await db.rawQuery("""
+    try {
+      final db = await _dbHelper.database;
+      final List<Map<String, dynamic>> maps = await db.rawQuery("""
       SELECT 
       cities.name AS cityName,
       states.name AS cityStateName,
@@ -31,9 +32,15 @@ class CityRepository {
         WHEN cities.name LIKE ? THEN 0
         ELSE 1
       END,
-      city_name
+      cityName
+      limit 30
+      
       """, ['%$cityName%', '%$cityName%', '%$cityName%']);
-    return List.generate(maps.length, (index) => City.fromMap(maps[index]));
+      return List.generate(maps.length, (index) => City.fromMap(maps[index]));
+    } catch (e) {
+      LoggerService.error(e.toString());
+      return [];
+    }
   }
 
   Future<void> insertWeather(int cityId, WeatherResponse weatherData) async {
@@ -65,24 +72,24 @@ class CityRepository {
     final db = await _dbHelper.database;
     try {
       // final List<Map<String, dynamic>> maps = await db.rawQuery(
-          // "Select id, city_name as cityName, city_country_name as cityCountryName, "
-          // "city_state_name as cityStateName, city_timezone as cityTimeZone from cityclock;");
-      final result= await db.rawQuery('''
+      // "Select id, city_name as cityName, city_country_name as cityCountryName, "
+      // "city_state_name as cityStateName, city_timezone as cityTimeZone from cityclock;");
+      final result = await db.rawQuery('''
       select 
       c.id as id,
       c.city_name as cityName,
       c.city_state_name as cityStateName,
       c.city_country_name as cityCountryName,
-      c.city_timezone as cityTimeZone
+      c.city_timezone as cityTimeZone,
       w.mainTemp as mainTemp,
       w.mainFeelsLike as mainFeelsLike,
       w.mainHumidity as mainHumidity ,
       w.weatherMain as weatherMain,
       w.weatherDescription as weatherDescription,
       w.weatherIcon as weatherIcon,
-      w.timeStamp as timeStamp,
-      from ${cityClockTable}  c
-      JOIN ${weatherTable}  w on c.id = w.cityId;
+      w.timeStamp as timeStamp
+      from ${cityClockTable} c
+      JOIN ${weatherTable} w on c.id = w.cityId;
       ''');
 
       // List<CityClock> cityClockList =
@@ -93,8 +100,7 @@ class CityRepository {
         WeatherResponse weatherResponse = WeatherResponse.fromMap(row);
         cityClock.weatherData = weatherResponse;
         return cityClock;
-      }
-      ).toList();
+      }).toList();
     } catch (exception) {
       LoggerService.error(exception.toString());
       throw ();

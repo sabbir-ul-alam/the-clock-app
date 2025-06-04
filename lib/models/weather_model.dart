@@ -83,9 +83,9 @@ class MainWeather {
     return MainWeather(
       // temp: (json['temp'] as num).toDouble(),
       // feelsLike: (json['feels_like'] as num).toDouble(),
-      temperature: json['temp'],
-      feelsLike: json['feels_like'],
-      humidity: json['humidity'],
+      temperature: (json['temp'] as num).toDouble(),
+      feelsLike: (json['feels_like'] as num).toDouble(),
+      humidity: (json['humidity'] as num).toDouble(),
     );
   }
 

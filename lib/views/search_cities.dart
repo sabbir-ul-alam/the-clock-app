@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../utils/logger_service.dart';
 import '../viewmodels/search_cities_viewmodel.dart';
+import 'package:intl/intl.dart';
+
 
 class SeachCities extends StatelessWidget{
   const SeachCities({super.key});
@@ -102,8 +104,9 @@ class _SearchDbWhileTypingSate extends State<SearchDbWhileTyping>{
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Expanded(
-                                child: Text('${city.cityName},${city.cityStateName}${city.cityCountryName}',
-                                overflow: TextOverflow.ellipsis,)
+                                child: Text(toBeginningOfSentenceCase('${city.cityName},${city.cityStateName},${city.cityCountryName}'),
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(),)
                             ),
                             Text('${city.cityTimeOffSet}')
                           ],

@@ -44,7 +44,7 @@ class CityClockTabState extends State<CityClockTab>{
 
           return Container(
             margin: EdgeInsets.only(bottom: 5, left: 5, right: 5),
-            height: 70,
+            height: 150,
             decoration: BoxDecoration(
                 border: Border.all(
                     color:Colors.grey),
@@ -77,7 +77,13 @@ class CityClockTabState extends State<CityClockTab>{
                       ),
                     ),
                   ],
-                )
+                ),
+                Text(city.weatherData!.weather.main),
+                Text(city.weatherData!.weather.description),
+                Text(city.weatherData!.main.temperature.toString()),
+                Text(city.weatherData!.main.feelsLike.toString()),
+                Text(city.weatherData!.main.humidity.toString()),
+
               ],
             )
           );

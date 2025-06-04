@@ -7,14 +7,14 @@ class CityService{
 
 final CityRepository cityRepository = CityRepository();
 
-bool saveClockCity(CityClock city) {
+int saveClockCity(CityClock city)  {
   try {
-    final id = cityRepository.insertCityClock(city);
-    return true;
+    cityRepository.insertCityClock(city);
+    return 1;
   }
   catch (exception) {
     LoggerService.error(exception.toString());
-    return false;
+    return -1;
   }
 }
 

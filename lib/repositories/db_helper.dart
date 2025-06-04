@@ -60,8 +60,7 @@ class DatabaseHelper{
       city_name TEXT,
       city_state_name TEXT,
       city_country_name TEXT,
-      cityTimeZone TEXT,
-      );
+      city_timezone TEXT);
       '''
     );
   }

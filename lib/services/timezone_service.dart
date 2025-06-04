@@ -1,6 +1,6 @@
 import '../models/city.dart';
 import 'package:timezone/timezone.dart' as tz;
-import 'package:timezone/data/latest.dart' as tz;
+import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:intl/intl.dart' as intl;
 
 void initTimeZone(){
@@ -8,11 +8,19 @@ void initTimeZone(){
 }
 
 String formatOffSet(City city){
-  final loc = tz.getLocation(city.cityTimeZone);
-  final now = tz.TZDateTime.now(loc);
-  final offSet= 'GTM ${now.timeZoneOffset.inHours.toString().padLeft(2,'0')}:'
-      '${now.timeZoneOffset.inMinutes.remainder(60).abs().toString().padLeft(2, '0')}';
-  return offSet;
+  try {
+    final loc = tz.getLocation(city.cityTimeZone);
+    final now = tz.TZDateTime.now(loc);
+    final offSet = 'GTM ${now.timeZoneOffset.inHours.toString().padLeft(
+        2, '0')}:'
+        '${now.timeZoneOffset.inMinutes.remainder(60).abs().toString().padLeft(
+        2, '0')}';
+    return offSet;
+  }
+  catch(e){
+    throw Exception(e);
+  }
+
 }
 
 List<City> getGmtOffset(List<City> cities) {

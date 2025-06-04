@@ -20,12 +20,18 @@ class City {
   });
 
   factory City.fromMap(Map<String, dynamic> map) {
-    return City(
-        cityName: map['cityName'],
-        cityStateName: map['cityStateName'],
-        cityCountryName: map['countryName'],
-        cityTimeZone: map['cityTimeZone'],
-        cityLatitude: map['cityLatitude'],
-        cityLongitude: map['cityLongitude']);
+    try {
+      return City(
+          cityName: map['cityName'],
+          cityStateName: map['cityStateName'],
+          cityCountryName: map['countryName'],
+          cityTimeZone: map['cityTimeZone'],
+          cityLatitude: (map['cityLatitude'] as num).toDouble(),
+          cityLongitude: (map['cityLongitude'] as num).toDouble()
+      );
+    }
+    catch (e) {
+      throw Exception(e.toString());
+    }
   }
 }
