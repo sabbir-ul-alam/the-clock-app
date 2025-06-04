@@ -1,4 +1,3 @@
-
 import '../models/city.dart';
 import 'package:flutter/material.dart';
 import '../services/city_service.dart';
@@ -6,55 +5,45 @@ import '../utils/logger_service.dart';
 import '../models/clock_city.dart';
 import '../services/timezone_service.dart';
 
-
-class CityClockViewModel extends ChangeNotifier{
-
+class CityClockViewModel extends ChangeNotifier {
   final CityService cityService = CityService();
   final List<CityClock> _clockCitiList = [];
   List<CityClock> get clockCitiList => _clockCitiList;
 
-  void fetchClockCities() async{
+  void fetchClockCities() async {
     try {
       List<CityClock> clockCities = await cityService.getClockCities();
       _clockCitiList.clear();
       _clockCitiList.addAll(clockCities);
       notifyListeners();
-    }
-    catch(exception){
+    } catch (exception) {
       LoggerService.error(exception.toString());
     }
   }
 
-  CityClock convertToClockCity(City city){
+  CityClock convertToClockCity(City city) {
     CityClock clockCity = CityClock(
         cityName: city.cityName,
+        cityStateName: city.cityStateName,
         cityCountryName: city.cityCountryName,
-        cityTimeZone: city.cityTimeZone,);
+        cityTimeZone: city.cityTimeZone);
     return clockCity;
-    
-}
+  }
 
-  void addCity (City city){
+  void addCity(City city) {
     try {
       final clockCity = convertToClockCity(city);
       bool saveSuccess = cityService.saveClockCity(clockCity);
       // if (saveSuccess) {
-        _clockCitiList.add(clockCity);
-        notifyListeners();
+      _clockCitiList.add(clockCity);
+      notifyListeners();
       // }
-    }
-    catch (exception ){
+    } catch (exception) {
       LoggerService.error(exception.toString());
-
     }
-
   }
-  String getTime(String timezone){
+
+  String getTime(String timezone) {
     return getCurrentTimeForCity(timezone);
-
   }
-
-
-
-
 }
