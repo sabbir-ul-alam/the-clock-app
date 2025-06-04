@@ -49,7 +49,6 @@ class AlarmTabState extends State<AlarmTab> {
               child: Stack(
                 children: [
                   Container(
-
                     margin:
                         const EdgeInsets.all(8.0), // acts like outer padding
                     decoration: BoxDecoration(
