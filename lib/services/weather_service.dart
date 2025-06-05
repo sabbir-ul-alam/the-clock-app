@@ -5,7 +5,6 @@ import 'package:theclockapp/models/weather_model.dart';
 import 'package:http/http.dart' as http;
 class WeatherService{
 
-  final String apiKey = "5a7165adf8398785a7d664d7af94548f";
 
   Future<WeatherResponse> fetchCurrentWeather(double lat, double long) async{
     final url = Uri.parse(
