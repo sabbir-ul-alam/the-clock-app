@@ -13,6 +13,7 @@ class CityClockTab extends StatefulWidget {
 
 class CityClockTabState extends State<CityClockTab> {
   late Timer _timer;
+  int? expandedIndex;
 
   @override
   void initState() {
@@ -39,66 +40,223 @@ class CityClockTabState extends State<CityClockTab> {
             itemBuilder: (context, index) {
               final city = widget.cityClockList.clockCitiList[index];
               final time = widget.cityClockList.getTime(city.cityTimeZone);
+              return AnimatedTile(
+                isExpanded: expandedIndex == index,
+                onTap: () {
+                  setState(() {
+                    expandedIndex = expandedIndex == index ? null : index;
+                  });
+                },
+              );
 
-              return Container(
-                  margin: EdgeInsets.only(bottom: 5, left: 5, right: 5),
-                  padding: EdgeInsets.only(bottom: 10, top: 10, left: 10, right: 5),
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.transparent),
-                    borderRadius: BorderRadius.circular(5),
-                    color: Colors.grey[200]
-                  ),
-                  child: Row(
-                    // spacing: 5,
-                    // mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      SizedBox(
-                        width: 200,
-                        child: Text(
-                          time,
-                          style: TextStyle(color: Colors.black, fontSize: 50, wordSpacing: 5),
-                        ),
-                      ),
-                      const SizedBox(width: 20),
-                      Container(
-                        width: 1,
-                        height: 50,
-                        color: Colors.black, // Placeholder divider color
-                      ),
-                      // const SizedBox(width: 16),
-                      SizedBox(
-                        width: 120,
-                        child: Column(
-                          // mainAxisAlignment: MainAxisAlignment.start,
-                          crossAxisAlignment:CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              toBeginningOfSentenceCase(city.cityCountryName.trim()),
-                              overflow: TextOverflow.ellipsis,
-                              style:
-                                  TextStyle(color: Colors.black, fontSize: 12),
-                            ),
-                            Text(
-                              toBeginningOfSentenceCase(city.cityName.trim()),
-                              overflow: TextOverflow.ellipsis,
-                              style:
-                                  TextStyle(color: Colors.black, fontSize: 24),
-                            ),
-                          ],
-                        ),
-                      ),
-                      // Text(city.weatherData!.weather.main),
-                      // Text(city.weatherData!.weather.description),
-                      // Text(city.weatherData!.main.temperature.toString()),
-                      // Text(city.weatherData!.main.feelsLike.toString()),
-                      // Text(city.weatherData!.main.humidity.toString()),
-                    ],
-                  ));
+              // return Container(
+              //     margin: EdgeInsets.only(bottom: 5, left: 5, right: 5),
+              //     padding: EdgeInsets.only(bottom: 10, top: 10, left: 10, right: 5),
+              //     decoration: BoxDecoration(
+              //       border: Border.all(color: Colors.transparent),
+              //       borderRadius: BorderRadius.circular(5),
+              //       color: Colors.grey[200]
+              //     ),
+              //     child: Row(
+              //       // spacing: 5,
+              //       // mainAxisAlignment: MainAxisAlignment.spaceAround,
+              //       mainAxisAlignment: MainAxisAlignment.spaceAround,
+              //       crossAxisAlignment: CrossAxisAlignment.center,
+              //       mainAxisSize: MainAxisSize.min,
+              //       children: [
+              //         SizedBox(
+              //           width: 200,
+              //           child: Text(
+              //             time,
+              //             style: TextStyle(color: Colors.black, fontSize: 50, wordSpacing: 5),
+              //           ),
+              //         ),
+              //         const SizedBox(width: 20),
+              //         Container(
+              //           width: 1,
+              //           height: 50,
+              //           color: Colors.black, // Placeholder divider color
+              //         ),
+              //         // const SizedBox(width: 16),
+              //         SizedBox(
+              //           width: 120,
+              //           child: Column(
+              //             // mainAxisAlignment: MainAxisAlignment.start,
+              //             crossAxisAlignment:CrossAxisAlignment.start,
+              //             children: [
+              //               Text(
+              //                 toBeginningOfSentenceCase(city.cityCountryName.trim()),
+              //                 overflow: TextOverflow.ellipsis,
+              //                 style:
+              //                     TextStyle(color: Colors.black, fontSize: 12),
+              //               ),
+              //               Text(
+              //                 toBeginningOfSentenceCase(city.cityName.trim()),
+              //                 overflow: TextOverflow.ellipsis,
+              //                 style:
+              //                     TextStyle(color: Colors.black, fontSize: 24),
+              //               ),
+              //             ],
+              //           ),
+              //         ),
+              //         // Text(city.weatherData!.weather.main),
+              //         // Text(city.weatherData!.weather.description),
+              //         // Text(city.weatherData!.main.temperature.toString()),
+              //         // Text(city.weatherData!.main.feelsLike.toString()),
+              //         // Text(city.weatherData!.main.humidity.toString()),
+              //       ],
+              //     ));
             },
           );
         });
+  }
+}
+
+class AnimatedTile extends StatefulWidget {
+  final bool isExpanded;
+  final VoidCallback? onTap;
+
+  const AnimatedTile({super.key, required this.isExpanded, this.onTap});
+
+  @override
+  State<AnimatedTile> createState() => _AnimatedTileState();
+}
+
+class _AnimatedTileState extends State<AnimatedTile> {
+  bool showExpandedContent = false;
+
+  @override
+  void didUpdateWidget(covariant AnimatedTile oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    // Handle expansion
+    if (widget.isExpanded && !oldWidget.isExpanded) {
+      Future.delayed(Duration(milliseconds: 600), () {
+        if (mounted && widget.isExpanded) {
+          setState(() => showExpandedContent = true);
+        }
+      });
+    }
+
+    // Handle collapse immediately
+    if (!widget.isExpanded && oldWidget.isExpanded) {
+      setState(() => showExpandedContent = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: widget.onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 400),
+        curve: Curves.easeInOut,
+        margin: const EdgeInsets.only(bottom: 5, right: 5, left: 5),
+        padding:
+            const EdgeInsets.only(top: 10, bottom: 10, left: 20, right: 20),
+        height: widget.isExpanded ? 200 : 80,
+        decoration: BoxDecoration(
+          color: Colors.grey,
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Stack(
+          children: [
+            // Time (top-left)
+            AnimatedAlign(
+              alignment:
+                  widget.isExpanded ? Alignment.topLeft : Alignment(-.8, 0),
+              duration: const Duration(milliseconds: 400),
+              child: AnimatedDefaultTextStyle(
+                duration: const Duration(milliseconds: 400),
+                style: TextStyle(
+                  fontSize: widget.isExpanded ? 16 : 50,
+                  color: Colors.white,
+                ),
+                child: const Text("03:47 AM"),
+              ),
+            ),
+            // Divider
+            AnimatedPositioned(
+              left: 230,
+              height: widget.isExpanded ? 80 : 40,
+              curve: Curves.easeInOut,
+              duration: const Duration(milliseconds: 800),
+              top: widget.isExpanded ? 50 : 10,
+              // left: widget.isExpanded ? 100 : 140,
+              // opacity: widget.isExpanded ? 1.0 : 0.0,
+              child: Container(
+                width: 1,
+                height: 40,
+                color: Colors.white,
+              ),
+            ),
+
+            // Location (top-right)
+            AnimatedAlign(
+              alignment:
+                  widget.isExpanded ? Alignment.topRight : Alignment(.7, 0),
+              duration: const Duration(milliseconds: 400),
+              child: AnimatedDefaultTextStyle(
+                  duration: const Duration(milliseconds: 400),
+                  style: TextStyle(
+                    fontSize: widget.isExpanded ? 12 : 14,
+                    color: Colors.white,
+                  ),
+                  textAlign:
+                      widget.isExpanded ? TextAlign.right : TextAlign.left,
+                  child: Text("Bangladesh" + "\n" + "Dhaka")),
+            ),
+
+            // Expanded Content
+            if (showExpandedContent)
+              Positioned(
+                // top: 0,
+                // left: 100,
+                child: widget.isExpanded
+                    ? Stack(children: [
+                        Align(
+                          alignment: Alignment(0, -.8),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: const [
+                              Text("Clouds",
+                                  style: TextStyle(
+                                      fontSize: 24, color: Colors.white)),
+                              SizedBox(width: 8),
+                              Icon(Icons.cloud, color: Colors.white),
+                            ],
+                          ),
+                        ),
+                        Align(
+                            alignment: Alignment(0, 0),
+                            child: Text("39c",
+                                style: TextStyle(
+                                    fontSize: 64, color: Colors.white))),
+                        Align(
+                          alignment: Alignment(.7, 0),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: const [
+                              Text("Feels like: 41c",
+                                  style: TextStyle(color: Colors.white)),
+                              Text("Humidity: 60%",
+                                  style: TextStyle(color: Colors.white)),
+                            ],
+                          ),
+                        ),
+                        Align(
+                          alignment: Alignment(0, .8),
+                          child: Text("Overcast clouds",
+                              style: TextStyle(color: Colors.white)),
+                        )
+                      ])
+                    : const SizedBox.shrink(),
+              ),
+          ],
+        ),
+      ),
+    );
   }
 }
