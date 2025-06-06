@@ -8,6 +8,7 @@ import 'services/alarm_service.dart';
 import 'services/notification_service.dart';
 import 'package:flutter/services.dart';
 
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 void main() async{
   WidgetsFlutterBinding.ensureInitialized();
@@ -15,6 +16,7 @@ void main() async{
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown, // Optional, allows upside-down
   ]);
+  await dotenv.load();
   initTimeZone();
   await initHive();
   await AlarmViewmodel().initHiveRepo();

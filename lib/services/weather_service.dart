@@ -1,10 +1,12 @@
 
 import 'dart:convert';
-
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:theclockapp/models/weather_model.dart';
 import 'package:http/http.dart' as http;
 class WeatherService{
 
+
+  final String apiKey = dotenv.env['API_KEY']!;
 
   Future<WeatherResponse> fetchCurrentWeather(double lat, double long) async{
     final url = Uri.parse(
