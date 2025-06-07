@@ -49,7 +49,7 @@ class CityClockTabState extends State<CityClockTab> {
               final current_dateTime =
                   widget.cityClockList.getDateTime(city.cityTimeZone);
               final isDay =
-                  current_dateTime.hour >= 18 || current_dateTime.hour <= 6
+                  current_dateTime.hour >= 18 || current_dateTime.hour <= 5
                       ? false
                       : true;
               return AnimatedTile(
@@ -60,6 +60,7 @@ class CityClockTabState extends State<CityClockTab> {
                     toBeginningOfSentenceCase(city.weatherData!.weather.main),
                 weatherDescription: toBeginningOfSentenceCase(
                     city.weatherData!.weather.description),
+                weatherIcon: city.weatherData!.weather.icon,
                 weatherTemperature:
                     city.weatherData!.main.temperature.round().toString(),
                 weatherFeelsLike:
@@ -148,6 +149,7 @@ class AnimatedTile extends StatefulWidget {
   final String country;
   final String weatherMain;
   final String weatherDescription;
+  final String? weatherIcon;
   final String weatherTemperature;
   final String weatherFeelsLike;
   final String weatherHumidity;
@@ -162,6 +164,7 @@ class AnimatedTile extends StatefulWidget {
     required this.country,
     required this.weatherMain,
     required this.weatherDescription,
+    this.weatherIcon,
     required this.weatherFeelsLike,
     required this.weatherHumidity,
     required this.weatherTemperature,
@@ -399,8 +402,14 @@ class _AnimatedTileState extends State<AnimatedTile> {
                                     style: TextStyle(
                                         fontSize: 24, color: Colors.white),
                                   ),
-                                  SizedBox(width: 8),
-                                  Icon(Icons.cloud, color: Colors.white),
+                                  // SizedBox(width: 8),
+                                  // Icon(Icons.cloud, color: Colors.white),
+                                  Image.asset(
+                                    height: 50,
+                                    width: 50,
+                                    'assets/weatherIcons/${widget.weatherIcon?.trim()}@2x.png'
+
+                                  )
                                 ],
                               ),
                               Text(
