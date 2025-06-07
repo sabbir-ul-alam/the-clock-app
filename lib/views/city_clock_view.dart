@@ -218,34 +218,37 @@ class _AnimatedTileState extends State<AnimatedTile> {
         ),
         child: Stack(
           children: [
-            // if(!widget.isExpanded)
             AnimatedPositioned(
-              left: widget.isDay ? -300 : 100,
-              top: widget.isDay ? -100 : 5,
+              left: !widget.isDay  && !widget.isExpanded ? 100 : -300,
+              top: !widget.isDay  && !widget.isExpanded?  5 : -100,
               duration: Duration(milliseconds: 800),
-              child: Image.asset(
-                'assets/many_stars.png',
-                width: 310,
-                height: 80,
-                // repeat: ImageRepeat.repeat,
-                fit: BoxFit.cover,
-              ),
+              child: !widget.isExpanded
+                  ? Image.asset(
+                      'assets/many_stars.png',
+                      width: 310,
+                      height: 80,
+                      // repeat: ImageRepeat.repeat,
+                      fit: BoxFit.cover,
+                    )
+                  : SizedBox.shrink(),
             ),
-            // if(!widget.isExpanded)
+
             AnimatedPositioned(
               duration: const Duration(milliseconds: 600),
               left: widget.isDay ? 300 : 520,
               // top: widget.isDay ? 0 : 100,
               // child: Padding(
               // padding: const EdgeInsets.all(20.0),
-              child: Image.asset(
-                'assets/sun.png',
-                width: 80,
-                height: 80,
-                fit: BoxFit.contain,
+              child: !widget.isExpanded
+                  ? Image.asset(
+                      'assets/sun.png',
+                      width: 80,
+                      height: 80,
+                      fit: BoxFit.contain,
 
-                // ),
-              ),
+                      // ),
+                    )
+                  : SizedBox.shrink(),
             ),
             AnimatedPositioned(
               duration: const Duration(milliseconds: 600),
@@ -253,40 +256,43 @@ class _AnimatedTileState extends State<AnimatedTile> {
               top: widget.isDay ? -120 : 0,
               // child: Padding(
               // padding: const EdgeInsets.all(20.0),
-              child: Image.asset(
+              child: !widget.isExpanded? Image.asset(
                 'assets/moon_cresent.png',
                 width: 80,
                 height: 70,
                 fit: BoxFit.contain,
 
                 // ),
-              ),
+              ):
+                  SizedBox.shrink(),
             ),
 
             // if(!widget.isExpanded)
             AnimatedPositioned(
               duration: const Duration(milliseconds: 800),
-              left: widget.isDay ? 151 : 520,
-              top: widget.isDay ? -5 : 100,
-              child: Image.asset(
+              left: widget.isDay && !widget.isExpanded  ? 151 : 520,
+              top: widget.isDay && !widget.isExpanded  ? -5 : 100,
+              child: !widget.isExpanded?Image.asset(
                 'assets/cloud_blue.png',
                 width: 300,
                 height: 80,
                 fit: BoxFit.contain,
-              ),
+              ):
+                  SizedBox.shrink(),
             ),
             // White clouds (day)
             // if(!widget.isExpanded)
             AnimatedPositioned(
               duration: const Duration(milliseconds: 800),
-              left: widget.isDay ? 171 : 500,
-              top: widget.isDay ? 0 : 100,
-              child: Image.asset(
+              left: widget.isDay && !widget.isExpanded ? 171 : 500,
+              top: widget.isDay && !widget.isExpanded ? 0 : 100,
+              child: !widget.isExpanded ? Image.asset(
                 'assets/cloud_white.png',
                 // width: ,
                 height: 80,
                 fit: BoxFit.fitWidth,
-              ),
+              ):
+                  SizedBox.shrink(),
             ),
 
             // Time (top-left)
