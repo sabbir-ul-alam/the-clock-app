@@ -85,6 +85,13 @@ flutter:
     - assets/icons/cross.svg
     - assets/icons/music.svg
     - .env
+    - assets/sun.png
+    - assets/moon.png
+    - assets/stars.png
+    - assets/cloud_blue.png
+    - assets/cloud_white.png
+    - assets/many_stars.png
+    - assets/moon_cresent.png
 
   # To add assets to your application, add an assets section, like this:
   # assets:

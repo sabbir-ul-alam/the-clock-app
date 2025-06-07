@@ -12,6 +12,7 @@ class CityClockTab extends StatefulWidget {
 }
 
 class CityClockTabState extends State<CityClockTab> {
+  bool isDay = false;
   late Timer _timer;
   int? expandedIndex;
 
@@ -19,8 +20,12 @@ class CityClockTabState extends State<CityClockTab> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    _timer =
-        Timer.periodic(Duration(seconds: 30), (Timer t) => setState(() {}));
+    _timer = Timer.periodic(Duration(seconds: 30), (Timer t) {
+      setState(() {
+        // isDay = DateTime.now().minute % 2 == 0;
+        isDay = !isDay;
+      });
+    });
   }
 
   @override
@@ -50,12 +55,16 @@ class CityClockTabState extends State<CityClockTab> {
                     city.weatherData!.weather.description),
                 weatherTemperature:
                     city.weatherData!.main.temperature.round().toString(),
-                weatherFeelsLike: city.weatherData!.main.feelsLike.round().toString(),
-                weatherHumidity: city.weatherData!.main.humidity.round().toString(),
+                weatherFeelsLike:
+                    city.weatherData!.main.feelsLike.round().toString(),
+                weatherHumidity:
+                    city.weatherData!.main.humidity.round().toString(),
                 isExpanded: expandedIndex == index,
+                isDay: isDay,
                 onTap: () {
                   setState(() {
                     expandedIndex = expandedIndex == index ? null : index;
+                    // isDay = !isDay;
                   });
                 },
               );
@@ -124,6 +133,7 @@ class CityClockTabState extends State<CityClockTab> {
 }
 
 class AnimatedTile extends StatefulWidget {
+  final bool isDay;
   final bool isExpanded;
   final VoidCallback? onTap;
   final String time;
@@ -135,18 +145,20 @@ class AnimatedTile extends StatefulWidget {
   final String weatherFeelsLike;
   final String weatherHumidity;
 
-  const AnimatedTile(
-      {super.key,
-      required this.isExpanded,
-      this.onTap,
-      required this.time,
-      required this.city,
-      required this.country,
-      required this.weatherMain,
-      required this.weatherDescription,
-      required this.weatherFeelsLike,
-      required this.weatherHumidity,
-      required this.weatherTemperature});
+  const AnimatedTile({
+    super.key,
+    required this.isDay,
+    required this.isExpanded,
+    this.onTap,
+    required this.time,
+    required this.city,
+    required this.country,
+    required this.weatherMain,
+    required this.weatherDescription,
+    required this.weatherFeelsLike,
+    required this.weatherHumidity,
+    required this.weatherTemperature,
+  });
 
   @override
   State<AnimatedTile> createState() => _AnimatedTileState();
@@ -182,15 +194,93 @@ class _AnimatedTileState extends State<AnimatedTile> {
         duration: const Duration(milliseconds: 400),
         curve: Curves.easeInOut,
         margin: const EdgeInsets.only(bottom: 5, right: 5, left: 5),
-        padding:
-            const EdgeInsets.only(top: 10, bottom: 10, left: 20, right: 10),
+        // padding:
+        //     const EdgeInsets.only(top: 10, bottom: 10, left: 20, right: 10),
         height: widget.isExpanded ? 200 : 80,
         decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: widget.isDay
+                ? [Colors.lightBlue.shade200, Colors.blue.shade700]
+                : [Colors.indigo.shade900, Colors.black],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
           color: Colors.grey,
           borderRadius: BorderRadius.circular(10),
         ),
         child: Stack(
           children: [
+            // if(!widget.isExpanded)
+            AnimatedPositioned(
+              left: widget.isDay ? -300 : 100,
+              top: widget.isDay ? -100 : 5,
+              duration: Duration(milliseconds: 800),
+              child: Image.asset(
+                'assets/many_stars.png',
+                width: 310,
+                height: 80,
+                // repeat: ImageRepeat.repeat,
+                fit: BoxFit.cover,
+              ),
+            ),
+            // if(!widget.isExpanded)
+            AnimatedPositioned(
+              duration: const Duration(milliseconds: 600),
+              left: widget.isDay ? 300 : 520,
+              // top: widget.isDay ? 0 : 100,
+              // child: Padding(
+              // padding: const EdgeInsets.all(20.0),
+              child: Image.asset(
+                'assets/sun.png',
+                width: 80,
+                height: 80,
+                fit: BoxFit.contain,
+
+                // ),
+              ),
+            ),
+            AnimatedPositioned(
+              duration: const Duration(milliseconds: 600),
+              left: widget.isDay ? -50 : 310,
+              top: widget.isDay ? -120 : 0,
+              // child: Padding(
+              // padding: const EdgeInsets.all(20.0),
+              child: Image.asset(
+                'assets/moon_cresent.png',
+                width: 80,
+                height: 70,
+                fit: BoxFit.contain,
+
+                // ),
+              ),
+            ),
+
+            // if(!widget.isExpanded)
+            AnimatedPositioned(
+              duration: const Duration(milliseconds: 800),
+              left: widget.isDay ? 151 : 520,
+              top: widget.isDay ? -5 : 100,
+              child: Image.asset(
+                'assets/cloud_blue.png',
+                width: 300,
+                height: 80,
+                fit: BoxFit.contain,
+              ),
+            ),
+            // White clouds (day)
+            // if(!widget.isExpanded)
+            AnimatedPositioned(
+              duration: const Duration(milliseconds: 800),
+              left: widget.isDay ? 171 : 500,
+              top: widget.isDay ? 0 : 100,
+              child: Image.asset(
+                'assets/cloud_white.png',
+                // width: ,
+                height: 80,
+                fit: BoxFit.fitWidth,
+              ),
+            ),
+
             // Time (top-left)
             AnimatedAlign(
               alignment:
@@ -223,12 +313,12 @@ class _AnimatedTileState extends State<AnimatedTile> {
 
             // Location (top-right)
             AnimatedAlign(
-              alignment: widget.isExpanded ? Alignment.topRight : Alignment(0.7, 0),
+              alignment:
+                  widget.isExpanded ? Alignment.topRight : Alignment(0.7, 0),
               duration: const Duration(milliseconds: 400),
               child: SizedBox(
                 width: 80, // Fixed width - adjust based on expected text length
                 child: AnimatedDefaultTextStyle(
-
                   duration: const Duration(milliseconds: 400),
                   style: TextStyle(
                     fontSize: widget.isExpanded ? 12 : 14,
@@ -237,7 +327,8 @@ class _AnimatedTileState extends State<AnimatedTile> {
                   child: Text(
                     '${widget.country}\n${widget.city}',
                     textAlign: TextAlign.left,
-                    overflow: TextOverflow.ellipsis, // Optional, to handle overflow
+                    overflow:
+                        TextOverflow.ellipsis, // Optional, to handle overflow
                     maxLines: 2,
                   ),
                 ),
