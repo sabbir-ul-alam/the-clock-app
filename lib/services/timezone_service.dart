@@ -35,8 +35,15 @@ List<City> getGmtOffset(List<City> cities) {
 
 
 
+DateTime getCurrentDateTimeForCity(String timeZone) {
+  final location = tz.getLocation(timeZone);
+  return tz.TZDateTime.now(location);
+  // final cityTime = tz.TZDateTime.now(location);
+  // return formatTime(cityTime);
+}
 String getCurrentTimeForCity(String timeZone) {
   final location = tz.getLocation(timeZone);
+  // return tz.TZDateTime.now(location);
   final cityTime = tz.TZDateTime.now(location);
   return formatTime(cityTime);
 }

@@ -12,7 +12,7 @@ class CityClockTab extends StatefulWidget {
 }
 
 class CityClockTabState extends State<CityClockTab> {
-  bool isDay = false;
+  // bool isDay = false;
   late Timer _timer;
   int? expandedIndex;
 
@@ -23,7 +23,7 @@ class CityClockTabState extends State<CityClockTab> {
     _timer = Timer.periodic(Duration(seconds: 30), (Timer t) {
       setState(() {
         // isDay = DateTime.now().minute % 2 == 0;
-        isDay = !isDay;
+        // isDay = !isDay;
       });
     });
   }
@@ -44,9 +44,16 @@ class CityClockTabState extends State<CityClockTab> {
             itemCount: widget.cityClockList.clockCitiList.length,
             itemBuilder: (context, index) {
               final city = widget.cityClockList.clockCitiList[index];
-              final time = widget.cityClockList.getTime(city.cityTimeZone);
+              final current_time =
+                  widget.cityClockList.getTime(city.cityTimeZone);
+              final current_dateTime =
+                  widget.cityClockList.getDateTime(city.cityTimeZone);
+              final isDay =
+                  current_dateTime.hour >= 18 || current_dateTime.hour <= 6
+                      ? false
+                      : true;
               return AnimatedTile(
-                time: time,
+                time: current_time,
                 city: toBeginningOfSentenceCase(city.cityName.trim()),
                 country: toBeginningOfSentenceCase(city.cityCountryName.trim()),
                 weatherMain:
@@ -166,6 +173,7 @@ class AnimatedTile extends StatefulWidget {
 
 class _AnimatedTileState extends State<AnimatedTile> {
   bool showExpandedContent = false;
+  // bool isDay =
 
   @override
   void didUpdateWidget(covariant AnimatedTile oldWidget) {
@@ -286,22 +294,28 @@ class _AnimatedTileState extends State<AnimatedTile> {
               alignment:
                   widget.isExpanded ? Alignment.topLeft : Alignment(-.8, 0),
               duration: const Duration(milliseconds: 400),
-              child: AnimatedDefaultTextStyle(
-                duration: const Duration(milliseconds: 400),
-                style: TextStyle(
-                  fontSize: widget.isExpanded ? 16 : 50,
-                  color: Colors.white,
+              child: Padding(
+                padding:
+                    EdgeInsets.only(top: 10, bottom: 10, left: 10, right: 10),
+                child: AnimatedDefaultTextStyle(
+                  duration: const Duration(milliseconds: 400),
+                  style: TextStyle(
+                    fontSize: widget.isExpanded ? 16 : 50,
+                    color: Colors.white,
+                    fontWeight:
+                        widget.isExpanded ? FontWeight.normal : FontWeight.bold,
+                  ),
+                  child: Text(widget.time),
                 ),
-                child: Text(widget.time),
               ),
             ),
             // Divider
             AnimatedPositioned(
-              left: 230,
+              left: 250,
               height: widget.isExpanded ? 80 : 40,
               curve: Curves.easeInOut,
               duration: const Duration(milliseconds: 800),
-              top: widget.isExpanded ? 50 : 10,
+              top: widget.isExpanded ? 60 : 20,
               // left: widget.isExpanded ? 100 : 140,
               // opacity: widget.isExpanded ? 1.0 : 0.0,
               child: Container(
@@ -317,19 +331,26 @@ class _AnimatedTileState extends State<AnimatedTile> {
                   widget.isExpanded ? Alignment.topRight : Alignment(0.7, 0),
               duration: const Duration(milliseconds: 400),
               child: SizedBox(
-                width: 80, // Fixed width - adjust based on expected text length
-                child: AnimatedDefaultTextStyle(
-                  duration: const Duration(milliseconds: 400),
-                  style: TextStyle(
-                    fontSize: widget.isExpanded ? 12 : 14,
-                    color: Colors.white,
-                  ),
-                  child: Text(
-                    '${widget.country}\n${widget.city}',
-                    textAlign: TextAlign.left,
-                    overflow:
-                        TextOverflow.ellipsis, // Optional, to handle overflow
-                    maxLines: 2,
+                width: 90, // Fixed width - adjust based on expected text length
+                child: Padding(
+                  padding: EdgeInsets.only(top: 10, bottom: 10, right: 5),
+                  child: AnimatedDefaultTextStyle(
+                    duration: const Duration(milliseconds: 400),
+                    style: TextStyle(
+                      fontSize: widget.isExpanded ? 12 : 16,
+                      fontWeight: widget.isExpanded
+                          ? FontWeight.normal
+                          : FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                    child: Text(
+                      '${widget.country}\n${widget.city}',
+                      textAlign: TextAlign.left,
+
+                      overflow:
+                          TextOverflow.ellipsis, // Optional, to handle overflow
+                      maxLines: 2,
+                    ),
                   ),
                 ),
               ),
@@ -359,24 +380,37 @@ class _AnimatedTileState extends State<AnimatedTile> {
                 child: widget.isExpanded
                     ? Stack(children: [
                         Align(
-                          alignment: Alignment(0, -.8),
-                          child: Row(
+                          alignment: Alignment(-.7, 0),
+                          child: Column(
                             mainAxisSize: MainAxisSize.min,
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Text(widget.weatherMain,
-                                  style: TextStyle(
-                                      fontSize: 24, color: Colors.white)),
-                              SizedBox(width: 8),
-                              Icon(Icons.cloud, color: Colors.white),
+                              Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    widget.weatherMain,
+                                    style: TextStyle(
+                                        fontSize: 24, color: Colors.white),
+                                  ),
+                                  SizedBox(width: 8),
+                                  Icon(Icons.cloud, color: Colors.white),
+                                ],
+                              ),
+                              Text(
+                                widget.weatherDescription,
+                                style: TextStyle(color: Colors.white),
+                              ),
                             ],
                           ),
                         ),
                         Align(
-                            alignment: Alignment(0, 0),
-                            child: Text("${widget.weatherTemperature}°",
-                                style: TextStyle(
-                                    fontSize: 64, color: Colors.white))),
+                          alignment: Alignment(0, 0),
+                          child: Text(
+                            "${widget.weatherTemperature}°",
+                            style: TextStyle(fontSize: 64, color: Colors.white),
+                          ),
+                        ),
                         Align(
                           alignment: Alignment(.7, 0),
                           child: Column(
@@ -390,11 +424,11 @@ class _AnimatedTileState extends State<AnimatedTile> {
                             ],
                           ),
                         ),
-                        Align(
-                          alignment: Alignment(0, .8),
-                          child: Text(widget.weatherDescription,
-                              style: TextStyle(color: Colors.white)),
-                        )
+                        // Align(
+                        //   alignment: Alignment(0, .8),
+                        //   child: Text(widget.weatherDescription,
+                        //       style: TextStyle(color: Colors.white)),
+                        // )
                       ])
                     : const SizedBox.shrink(),
               ),

@@ -52,6 +52,9 @@ class CityClockViewModel extends ChangeNotifier {
     }
   }
 
+  DateTime getDateTime(String timezone) {
+    return getCurrentDateTimeForCity(timezone);
+  }
   String getTime(String timezone) {
     return getCurrentTimeForCity(timezone);
   }
