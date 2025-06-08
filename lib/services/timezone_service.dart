@@ -7,7 +7,7 @@ void initTimeZone(){
   tz.initializeTimeZones();
 }
 
-String formatOffSet(City city){
+String formatOffSet(SearchCity city){
   try {
     final loc = tz.getLocation(city.cityTimeZone);
     final now = tz.TZDateTime.now(loc);
@@ -23,8 +23,8 @@ String formatOffSet(City city){
 
 }
 
-List<City> getGmtOffset(List<City> cities) {
-  List<City> cityListWithOffset = [];
+List<SearchCity> getGmtOffset(List<SearchCity> cities) {
+  List<SearchCity> cityListWithOffset = [];
   for (final city in cities) {
     final offset = formatOffSet(city);
     city.cityTimeOffSet = offset;

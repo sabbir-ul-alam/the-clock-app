@@ -12,11 +12,38 @@ class CityRepository {
   final String weatherTable = 'weather';
   final DatabaseHelper _dbHelper = DatabaseHelper();
 
-  Future<List<City>> getCities(String cityName) async {
+  Future<SearchCity> getCityById(int id) async {
     try {
       final db = await _dbHelper.database;
       final List<Map<String, dynamic>> maps = await db.rawQuery("""
       SELECT 
+      cities.id AS cityId,
+      cities.name AS cityName,
+      states.name AS cityStateName,
+      countries.name AS countryName,
+      cities.latitude AS cityLatitude,
+      cities.longitude AS cityLongitude,
+      cities.timezone AS cityTimeZone
+      FROM ${cityTable}  cities
+      JOIN ${stateTable}  states ON cities.state_id = states.id
+      JOIN ${countryTable}  countries ON cities.country_id = countries.id
+      WHERE cities.id = ?
+        """,[id]);
+
+      return SearchCity.fromMap(maps[0]);
+
+    } catch (e) {
+      LoggerService.error(e.toString());
+      throw Exception(e);
+    }
+  }
+
+  Future<List<SearchCity>> getCitiesByName(String cityName) async {
+    try {
+      final db = await _dbHelper.database;
+      final List<Map<String, dynamic>> maps = await db.rawQuery("""
+      SELECT 
+      cities.id AS cityId,
       cities.name AS cityName,
       states.name AS cityStateName,
       countries.name AS countryName,
@@ -36,7 +63,8 @@ class CityRepository {
       limit 30
       
       """, ['%$cityName%', '%$cityName%', '%$cityName%']);
-      return List.generate(maps.length, (index) => City.fromMap(maps[index]));
+      return List.generate(
+          maps.length, (index) => SearchCity.fromMap(maps[index]));
     } catch (e) {
       LoggerService.error(e.toString());
       return [];
@@ -77,6 +105,7 @@ class CityRepository {
       final result = await db.rawQuery('''
       select 
       c.id as id,
+      c.search_city_id as searchCityId,
       c.city_name as cityName,
       c.city_state_name as cityStateName,
       c.city_country_name as cityCountryName,

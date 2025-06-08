@@ -3,6 +3,7 @@ import 'weather_model.dart';
 
 class CityClock {
   int? id;
+  int searchCityId;
   String cityName;
   String cityStateName;
   String cityCountryName;
@@ -15,6 +16,7 @@ class CityClock {
 
   CityClock({
     this.id,
+    required this.searchCityId,
     required this.cityName,
     required this.cityCountryName,
     required this.cityStateName,
@@ -28,6 +30,7 @@ class CityClock {
   factory CityClock.fromMap(Map<String,dynamic> map){
     return CityClock(
       id: map['id'],
+      searchCityId: (map['searchCityId'] as num).toInt(),
       cityName: map['cityName'],
       cityStateName: map['cityStateName'],
       cityCountryName: map['cityCountryName'],
@@ -39,6 +42,7 @@ class CityClock {
   Map<String, dynamic>toMap(){
     return{
       'id': id,
+      'search_city_id':  searchCityId,
       'city_name': cityName,
       'city_country_name': cityCountryName,
       'city_state_name': cityStateName,

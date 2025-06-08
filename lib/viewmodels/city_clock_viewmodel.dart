@@ -23,8 +23,9 @@ class CityClockViewModel extends ChangeNotifier {
     }
   }
 
-  CityClock convertToClockCity(City city) {
+  CityClock convertToClockCity(SearchCity city) {
     CityClock clockCity = CityClock(
+        searchCityId: city.cityId,
         cityName: city.cityName,
         cityStateName: city.cityStateName,
         cityCountryName: city.cityCountryName,
@@ -32,19 +33,18 @@ class CityClockViewModel extends ChangeNotifier {
     return clockCity;
   }
 
-  void addCity(City city) async {
+  void addCity(SearchCity city) async {
     try {
       final clockCity = convertToClockCity(city);
       clockCity.weatherData = await weatherService.fetchCurrentWeather(
           city.cityLatitude, city.cityLongitude);
-      LoggerService.debug(clockCity.weatherData.toString());
+      // LoggerService.debug(clockCity.weatherData.toString());
 
       int saveSuccess = cityService.saveClockCity(clockCity);
       if (saveSuccess == 1) {
         _clockCitiList.add(clockCity);
         notifyListeners();
-      }
-      else if (saveSuccess == -1)  {
+      } else if (saveSuccess == -1) {
         throw Exception("Failed to save from modelview $saveSuccess");
       }
     } catch (exception) {
@@ -55,6 +55,7 @@ class CityClockViewModel extends ChangeNotifier {
   DateTime getDateTime(String timezone) {
     return getCurrentDateTimeForCity(timezone);
   }
+
   String getTime(String timezone) {
     return getCurrentTimeForCity(timezone);
   }

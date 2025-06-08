@@ -9,7 +9,6 @@ class WeatherResponse {
     return WeatherResponse(
       weather: Weather.fromJson(json['weather'][0]),
       main: MainWeather.fromJson(json['main']),
-      // timeStamp: json['timeStamp'],
     );
   }
 

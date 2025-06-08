@@ -3,12 +3,14 @@ import 'dart:convert';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:theclockapp/models/weather_model.dart';
 import 'package:http/http.dart' as http;
+import 'package:theclockapp/utils/logger_service.dart';
 class WeatherService{
 
 
   final String apiKey = dotenv.env['API_KEY']!;
 
   Future<WeatherResponse> fetchCurrentWeather(double lat, double long) async{
+    LoggerService.info("Calling weather service");
     final url = Uri.parse(
         "https://api.openweathermap.org/data/2.5/weather?lat=$lat&lon=$long&appid=$apiKey&units=metric"
     );

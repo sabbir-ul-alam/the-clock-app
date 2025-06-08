@@ -57,6 +57,7 @@ class DatabaseHelper{
       '''
       CREATE TABLE IF NOT EXISTS cityclock (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
+      search_city_id INTEGER,
       city_name TEXT,
       city_state_name TEXT,
       city_country_name TEXT,

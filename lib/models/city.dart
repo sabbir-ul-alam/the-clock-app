@@ -1,6 +1,7 @@
 import 'dart:ffi';
 
-class City {
+class SearchCity {
+  final int cityId;
   final String cityName;
   final String cityStateName;
   final String cityCountryName;
@@ -9,7 +10,8 @@ class City {
   final double cityLatitude;
   final double cityLongitude;
 
-  City({
+  SearchCity({
+    required this.cityId,
     required this.cityName,
     required this.cityStateName,
     required this.cityCountryName,
@@ -19,18 +21,17 @@ class City {
     this.cityTimeOffSet,
   });
 
-  factory City.fromMap(Map<String, dynamic> map) {
+  factory SearchCity.fromMap(Map<String, dynamic> map) {
     try {
-      return City(
+      return SearchCity(
+          cityId: map['cityId'],
           cityName: map['cityName'],
           cityStateName: map['cityStateName'],
           cityCountryName: map['countryName'],
           cityTimeZone: map['cityTimeZone'],
           cityLatitude: (map['cityLatitude'] as num).toDouble(),
-          cityLongitude: (map['cityLongitude'] as num).toDouble()
-      );
-    }
-    catch (e) {
+          cityLongitude: (map['cityLongitude'] as num).toDouble());
+    } catch (e) {
       throw Exception(e.toString());
     }
   }

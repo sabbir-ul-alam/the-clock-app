@@ -8,16 +8,16 @@ import '../services/timezone_service.dart';
 class SearchCitiesViewModel extends ChangeNotifier{
 
 
-  List<City> searchedCityList = [];
+  List<SearchCity> searchedCityList = [];
   final CityRepository cityRepository = CityRepository();
 
   SearchCitiesViewModel();
 
   void getCitiesFromDbByName(String name) async{
     try {
-      List<City> dbCities = await cityRepository.getCities(name);
+      List<SearchCity> dbCities = await cityRepository.getCitiesByName(name);
 
-      List<City> citiesWithOffset = getGmtOffset(dbCities);
+      List<SearchCity> citiesWithOffset = getGmtOffset(dbCities);
 
 
       for (final city in citiesWithOffset) {
