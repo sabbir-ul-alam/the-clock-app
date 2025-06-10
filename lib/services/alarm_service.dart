@@ -23,15 +23,7 @@ void alarmCallBack(int id, Map<String, dynamic> params) async {
     bool repeat = params["repeatWeekly"];
 
     if (alarmId == null) return;
-    //
-    // const platform = MethodChannel('alarm_notification');
-    // try {
-    //   await platform.invokeMethod('scheduleNativeAlarm', {
-    //     'alarmTimeMillis': DateTime.now().millisecondsSinceEpoch,
-    //   });
-    // } catch (e) {
-    //   print("Failed to schedule native alarm: $e");
-    // }
+
 
     //attempt to solve the distorted alarm sound at the beginning
     FlutterRingtonePlayer().play(
@@ -42,11 +34,11 @@ void alarmCallBack(int id, Map<String, dynamic> params) async {
       looping: false, // important: don't loop
     );
 
-    final portName = 'alarm_command_channel_$alarmId';
-    IsolateNameServer.removePortNameMapping(portName);
-    final receivePort = ReceivePort();
-    IsolateNameServer.registerPortWithName(receivePort.sendPort, portName);
-
+    // final portName = 'alarm_command_channel_$alarmId';
+    // IsolateNameServer.removePortNameMapping(portName);
+    // final receivePort = ReceivePort();
+    // IsolateNameServer.registerPortWithName(receivePort.sendPort, portName);
+    //
     final mainIsolatePort =
     IsolateNameServer.lookupPortByName('alarm_event_channel');
     mainIsolatePort?.send({'type': 'alarm_started', 'alarmId': alarmId});
@@ -90,11 +82,12 @@ void alarmCallBack(int id, Map<String, dynamic> params) async {
       }
     }
     LoggerService.debug("Alarm triggered in the BG ${alarmId}");
+    // await NotificationService.showNotification("Alarm", "Your alarm is ringing!");
 
     print("Alarm ID: $alarmId, isAlarm: ${isAlarm}, tonePath: ${tonePath}");
 
     if(repeat){
-      await initNotificationService();
+      // await initNotificationService();
       final DateTime originalScheduledTime = DateTime.parse(params['scheduledTime']);
       final nextWeek = getNextValidDateTime(originalScheduledTime);
       await AndroidAlarmManager.oneShotAt(
@@ -116,27 +109,27 @@ void alarmCallBack(int id, Map<String, dynamic> params) async {
         },
       );
     }
-    bool stopped = false;
-    await receivePort.timeout(
-      const Duration(seconds: 60),
-      onTimeout: (sink) {
-        print("[Timeout] Auto-stopping alarm.");
-        FlutterRingtonePlayer().stop();
-        receivePort.close();
-        IsolateNameServer.removePortNameMapping(portName);
-        stopped = true;
-      },
-    ).forEach((msg) {
-      if (msg == 'stop_alarm') {
-        print("[Message] Stop alarm command received.");
-        FlutterRingtonePlayer().stop();
-        receivePort.close();
-        IsolateNameServer.removePortNameMapping(portName);
-        stopped = true;
-      }
-      LoggerService.debug(
-          "[EXIT] alarmId $alarmId isolate completed, msg $msg port $portName");
-    });
+    // bool stopped = false;
+    // await receivePort.timeout(
+    //   const Duration(seconds: 60),
+    //   onTimeout: (sink) {
+    //     print("[Timeout] Auto-stopping alarm.");
+    //     FlutterRingtonePlayer().stop();
+    //     receivePort.close();
+    //     IsolateNameServer.removePortNameMapping(portName);
+    //     stopped = true;
+    //   },
+    // ).forEach((msg) {
+    //   if (msg == 'stop_alarm') {
+    //     print("[Message] Stop alarm command received.");
+    //     FlutterRingtonePlayer().stop();
+    //     receivePort.close();
+    //     IsolateNameServer.removePortNameMapping(portName);
+    //     stopped = true;
+    //   }
+    //   LoggerService.debug(
+    //       "[EXIT] alarmId $alarmId isolate completed, msg $msg port $portName");
+    // });
   }catch(e){
     print("Error failed $e");
   }

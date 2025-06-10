@@ -45,3 +45,26 @@
 //        notificationManager.notify(999, notification)
 //    }
 //}
+
+//
+//
+//package com.example.theclockapp
+//
+//import io.flutter.plugin.common.MethodChannel
+//import io.flutter.embedding.engine.FlutterEngine
+//import io.flutter.embedding.engine.FlutterEngineCache
+//import io.flutter.plugin.common.BasicMessageChannel
+//import io.flutter.plugin.common.StringCodec
+//
+//class AlarmActionReceiver : BroadcastReceiver() {
+//    override fun onReceive(context: Context, intent: Intent) {
+//        if (intent.action == "CANCEL_ALARM") {
+//            val engine = FlutterEngineCache.getInstance().get("main_engine")
+//            if (engine != null) {
+//                BasicMessageChannel<String>(engine.dartExecutor, "alarm_event_channel", StringCodec.INSTANCE)
+//                    .send("{\"type\": \"alarm_cancelled\"}")
+//            }
+//        }
+//    }
+//}
+

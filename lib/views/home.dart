@@ -65,6 +65,7 @@ class _HomeScreenState extends State<HomeScreen> {
         centerTitle: true,
       ),
       body: SafeArea(
+
         bottom: true,
         child: _tabIndex == 0
             ? CityClockTab(cityClockList: cityClockList)
@@ -108,6 +109,8 @@ class _HomeScreenState extends State<HomeScreen> {
         child: const Icon(Icons.add, color: Colors.black,),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+
+
     );
   }
 }

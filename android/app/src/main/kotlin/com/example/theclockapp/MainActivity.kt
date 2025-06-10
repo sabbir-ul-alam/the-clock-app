@@ -51,40 +51,52 @@ class MainActivity: FlutterActivity() {
             }
 
 //        // Native alarm scheduler channel
-//        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, ALARM_CHANNEL)
-//            .setMethodCallHandler { call, result ->
-//                if (call.method == "scheduleNativeAlarm") {
-//                    val timeMillis = call.argument<Long>("alarmTimeMillis")
-//                    if (timeMillis != null) {
-//                        scheduleNativeAlarm(timeMillis)
-//                        result.success(null)
-//                    } else {
-//                        result.error("INVALID_ARGUMENT", "Missing alarmTimeMillis", null)
-//                    }
-//                } else {
-//                    result.notImplemented()
-//                }
-//            }
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, ALARM_CHANNEL)
+            .setMethodCallHandler { call, result ->
+                if (call.method == "showNotification") {
+                    val title = call.argument<String>("title") ?: "Alarm"
+                    val body = call.argument<String>("body") ?: "It's time!"
+                    showNativeNotification(applicationContext, title, body)
+                    result.success(null)
+                }
+            }
     }
 
-//    @RequiresApi(Build.VERSION_CODES.S)
-//    private fun scheduleNativeAlarm(timeMillis: Long) {
-//        val intent = Intent(this, AlarmReceiver::class.java)
-//        val pendingIntent = PendingIntent.getBroadcast(
-//            this,
-//            0,
-//            intent,
-//            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-//        )
-//
-//        val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
-//
-//        if(alarmManager.canScheduleExactAlarms()){
-//        alarmManager.setExactAndAllowWhileIdle(
-//            AlarmManager.RTC_WAKEUP,
-//            timeMillis,
-//            pendingIntent
-//        )
-//        }
-//    }
+    companion object fun showNativeNotification(
+        context: Context, title: String, body: String){
+        val channelId = "alarm_channel_id"
+
+        val notificationManager =
+            context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channel = NotificationChannel(
+                channelId,
+                "Alarm Notifications",
+                NotificationManager.IMPORTANCE_HIGH
+            )
+            notificationManager.createNotificationChannel(channel)
+        }
+        val intent = Intent(context, MainActivity::class.java)
+        val pendingIntent = PendingIntent.getActivity(
+            context,
+            0,
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        val notification = NotificationCompat.Builder(context, channelId)
+            .setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
+            .setContentTitle(title)
+            .setContentText(body)
+            .setAutoCancel(true)
+            .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
+            .setContentIntent(pendingIntent)
+            .build()
+
+        notificationManager.notify(System.currentTimeMillis().toInt(), notification)
+
+    }
+
+
 }
