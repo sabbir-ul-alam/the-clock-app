@@ -39,9 +39,9 @@ void alarmCallBack(int id, Map<String, dynamic> params) async {
     // final receivePort = ReceivePort();
     // IsolateNameServer.registerPortWithName(receivePort.sendPort, portName);
     //
-    final mainIsolatePort =
-    IsolateNameServer.lookupPortByName('alarm_event_channel');
-    mainIsolatePort?.send({'type': 'alarm_started', 'alarmId': alarmId});
+    // final mainIsolatePort =
+    // IsolateNameServer.lookupPortByName('alarm_event_channel');
+    // mainIsolatePort?.send({'type': 'alarm_started', 'alarmId': alarmId});
 
     if (!isAlarm) {
       Future.delayed(Duration(milliseconds: 300), () {
@@ -82,7 +82,7 @@ void alarmCallBack(int id, Map<String, dynamic> params) async {
       }
     }
     LoggerService.debug("Alarm triggered in the BG ${alarmId}");
-    // await NotificationService.showNotification("Alarm", "Your alarm is ringing!");
+    await NotificationService.showNotification("Alarm", "Your alarm is ringing!");
 
     print("Alarm ID: $alarmId, isAlarm: ${isAlarm}, tonePath: ${tonePath}");
 
