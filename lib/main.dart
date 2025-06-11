@@ -27,26 +27,26 @@ void main() async {
   await AndroidAlarmManager.initialize();
   // await initNotificationService();
 
-  // Register port for background isolates
-  final receivePort = ReceivePort();
-  IsolateNameServer.registerPortWithName(
-      receivePort.sendPort, 'alarm_event_channel');
-
-  receivePort.listen((message) {
-    if (message is Map && message['type'] == 'alarm_started') {
-      final alarmId = message['alarmId'];
-      NotificationService.showNotification(
-          "Alarm", "Alarm $alarmId is ringing!");
-      Future.delayed(const Duration(seconds: 10), () {
-        FlutterRingtonePlayer().stop();
-        print("Alarm cancelled from notification.");      });
-    }
-    // else if (message is Map && message['type'] == 'alarm_cancelled') {
-    //   // From notification button
-    //   FlutterRingtonePlayer().stop();
-    //   print("Alarm cancelled from notification.");
-    // }
-  });
+  // // Register port for background isolates
+  // final receivePort = ReceivePort();
+  // IsolateNameServer.registerPortWithName(
+  //     receivePort.sendPort, 'alarm_event_channel');
+  //
+  // receivePort.listen((message) {
+  //   if (message is Map && message['type'] == 'alarm_started') {
+  //     final alarmId = message['alarmId'];
+  //     NotificationService.showNotification(
+  //         "Alarm", "Alarm $alarmId is ringing!");
+  //     Future.delayed(const Duration(seconds: 10), () {
+  //       FlutterRingtonePlayer().stop();
+  //       print("Alarm cancelled from notification.");      });
+  //   }
+  //   // else if (message is Map && message['type'] == 'alarm_cancelled') {
+  //   //   // From notification button
+  //   //   FlutterRingtonePlayer().stop();
+  //   //   print("Alarm cancelled from notification.");
+  //   // }
+  // });
 
   runApp(const MyApp());
 }
