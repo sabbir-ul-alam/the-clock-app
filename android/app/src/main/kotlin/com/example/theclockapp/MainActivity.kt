@@ -1,5 +1,6 @@
 package com.example.theclockapp
 
+import AlarmReceiver
 import android.app.AlarmManager
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -55,48 +56,23 @@ class MainActivity: FlutterActivity() {
             .setMethodCallHandler { call, result ->
                 if (call.method == "showNotification") {
                     val title = call.argument<String>("title") ?: "Alarm"
-                    val body = call.argument<String>("body") ?: "It's time!"
-                    showNativeNotification(applicationContext, title, body)
+                    val message = call.argument<String>("message") ?: "Your alarm is ringing!"
+
+                    val intent = Intent(applicationContext, AlarmReceiver::class.java)
+                    intent.putExtra("title", title)
+                    intent.putExtra("message", message)
+
+                    applicationContext.sendBroadcast(intent)
                     result.success(null)
+//                    showNativeNotification(applicationContext, title, body)
+//                    result.success(null)
+                }
+                     else {
+                        result.notImplemented()
+                    }
+
                 }
             }
     }
 
-    companion object fun showNativeNotification(
-        context: Context, title: String, body: String){
-        val channelId = "alarm_channel_id"
 
-        val notificationManager =
-            context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(
-                channelId,
-                "Alarm Notifications",
-                NotificationManager.IMPORTANCE_HIGH
-            )
-            notificationManager.createNotificationChannel(channel)
-        }
-        val intent = Intent(context, MainActivity::class.java)
-        val pendingIntent = PendingIntent.getActivity(
-            context,
-            0,
-            intent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
-
-        val notification = NotificationCompat.Builder(context, channelId)
-            .setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
-            .setContentTitle(title)
-            .setContentText(body)
-            .setAutoCancel(true)
-            .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
-            .setContentIntent(pendingIntent)
-            .build()
-
-        notificationManager.notify(System.currentTimeMillis().toInt(), notification)
-
-    }
-
-
-}

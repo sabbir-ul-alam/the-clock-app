@@ -11,6 +11,7 @@
 
 
 
+
     <application
         android:label="theclockapp"
         android:name="${applicationName}"
@@ -52,7 +53,7 @@
             android:name="flutterEmbedding"
             android:value="2" />
 
-        <receiver android:name=".AlarmReceiver" android:exported="true" />
+        <receiver android:name=".AlamrReceiver" android:exported="true" />
         <!-- Required for android_alarm_manager_plus -->
         <receiver
             android:name="dev.fluttercommunity.plus.androidalarmmanager.AlarmBroadcastReceiver"
