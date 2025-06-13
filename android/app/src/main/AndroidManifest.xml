@@ -13,8 +13,8 @@
 
 
     <application
-        android:label="theclockapp"
-        android:name="${applicationName}"
+        android:label="TheApp"
+        android:name = "${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
 
@@ -53,7 +53,7 @@
             android:name="flutterEmbedding"
             android:value="2" />
 
-        <receiver android:name=".AlamrReceiver" android:exported="true" />
+        <receiver android:name="com.example.theclockapp.AlarmReceiver" android:exported="true" />
         <!-- Required for android_alarm_manager_plus -->
         <receiver
             android:name="dev.fluttercommunity.plus.androidalarmmanager.AlarmBroadcastReceiver"
@@ -68,6 +68,8 @@
                 <action android:name="android.intent.action.MY_PACKAGE_REPLACED"/>
             </intent-filter>
         </receiver>
+
+        <receiver android:exported="false" android:name="com.dexterous.flutterlocalnotifications.ActionBroadcastReceiver" />
 
         <service
             android:name="dev.fluttercommunity.plus.androidalarmmanager.AlarmService"

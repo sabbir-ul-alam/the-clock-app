@@ -2,14 +2,12 @@ import 'dart:isolate';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_ringtone_player/flutter_ringtone_player.dart';
+import 'package:theclockapp/services/notification_service.dart';
 import 'package:theclockapp/views/home.dart';
 import 'services/timezone_service.dart';
 import 'services/hive_service.dart';
 import 'viewmodels/alarm_viewmodel.dart';
 import 'package:android_alarm_manager_plus/android_alarm_manager_plus.dart';
-import 'services/alarm_service.dart';
-import 'services/notification_service.dart';
 import 'package:flutter/services.dart';
 
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -21,32 +19,11 @@ void main() async {
     DeviceOrientation.portraitDown, // Optional, allows upside-down
   ]);
   await dotenv.load();
+  await AndroidAlarmManager.initialize();
+  NotificationService().initNotificationService();// ❗ VERY IMPORTANT
   initTimeZone();
   await initHive();
   await AlarmViewmodel().initHiveRepo();
-  await AndroidAlarmManager.initialize();
-  // await initNotificationService();
-
-  // // Register port for background isolates
-  // final receivePort = ReceivePort();
-  // IsolateNameServer.registerPortWithName(
-  //     receivePort.sendPort, 'alarm_event_channel');
-  //
-  // receivePort.listen((message) {
-  //   if (message is Map && message['type'] == 'alarm_started') {
-  //     final alarmId = message['alarmId'];
-  //     NotificationService.showNotification(
-  //         "Alarm", "Alarm $alarmId is ringing!");
-  //     Future.delayed(const Duration(seconds: 10), () {
-  //       FlutterRingtonePlayer().stop();
-  //       print("Alarm cancelled from notification.");      });
-  //   }
-  //   // else if (message is Map && message['type'] == 'alarm_cancelled') {
-  //   //   // From notification button
-  //   //   FlutterRingtonePlayer().stop();
-  //   //   print("Alarm cancelled from notification.");
-  //   // }
-  // });
 
   runApp(const MyApp());
 }

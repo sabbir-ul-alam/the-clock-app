@@ -11,8 +11,7 @@ import '../utils/logger_service.dart';
 import 'notification_service.dart';
 import 'dart:ui';
 
-
-@pragma('vm:entry-point')
+// @pragma('vm:entry-point')
 void alarmCallBack(int id, Map<String, dynamic> params) async {
   try {
     print("Alarm Isolate: ${Isolate.current.hashCode}");
@@ -24,6 +23,10 @@ void alarmCallBack(int id, Map<String, dynamic> params) async {
 
     if (alarmId == null) return;
 
+    final portName = 'alarm_event_channel';
+    IsolateNameServer.removePortNameMapping(portName);
+    final receivePort = ReceivePort();
+    IsolateNameServer.registerPortWithName(receivePort.sendPort, portName);
 
     //attempt to solve the distorted alarm sound at the beginning
     FlutterRingtonePlayer().play(
@@ -33,15 +36,6 @@ void alarmCallBack(int id, Map<String, dynamic> params) async {
       asAlarm: true,
       looping: false, // important: don't loop
     );
-
-    // final portName = 'alarm_command_channel_$alarmId';
-    // IsolateNameServer.removePortNameMapping(portName);
-    // final receivePort = ReceivePort();
-    // IsolateNameServer.registerPortWithName(receivePort.sendPort, portName);
-    //
-    // final mainIsolatePort =
-    // IsolateNameServer.lookupPortByName('alarm_event_channel');
-    // mainIsolatePort?.send({'type': 'alarm_started', 'alarmId': alarmId});
 
     if (!isAlarm) {
       Future.delayed(Duration(milliseconds: 300), () {
@@ -55,7 +49,7 @@ void alarmCallBack(int id, Map<String, dynamic> params) async {
         );
       });
     } else {
-      if(tonePath==null) {
+      if (tonePath == null) {
         Future.delayed(Duration(milliseconds: 300), () {
           FlutterRingtonePlayer().stop();
           FlutterRingtonePlayer().play(
@@ -66,8 +60,7 @@ void alarmCallBack(int id, Map<String, dynamic> params) async {
             asAlarm: true,
           );
         });
-      }
-      else{
+      } else {
         Future.delayed(Duration(milliseconds: 300), () {
           FlutterRingtonePlayer().stop();
           FlutterRingtonePlayer().play(
@@ -78,17 +71,16 @@ void alarmCallBack(int id, Map<String, dynamic> params) async {
             asAlarm: true,
           );
         });
-
       }
     }
     LoggerService.debug("Alarm triggered in the BG ${alarmId}");
-    await NotificationService.showNotification("Alarm", "Your alarm is ringing!");
 
-    print("Alarm ID: $alarmId, isAlarm: ${isAlarm}, tonePath: ${tonePath}");
+    NotificationService().showNotification(
+        title: 'Alarm notification', body: 'Body of the  notification');
 
-    if(repeat){
-      // await initNotificationService();
-      final DateTime originalScheduledTime = DateTime.parse(params['scheduledTime']);
+    if (repeat) {
+      final DateTime originalScheduledTime =
+          DateTime.parse(params['scheduledTime']);
       final nextWeek = getNextValidDateTime(originalScheduledTime);
       await AndroidAlarmManager.oneShotAt(
         nextWeek,
@@ -105,36 +97,19 @@ void alarmCallBack(int id, Map<String, dynamic> params) async {
           'isAlarm': isAlarm,
           'repeatWeekly': true,
           'scheduledTime': nextWeek.toIso8601String(),
-
         },
       );
     }
-    // bool stopped = false;
-    // await receivePort.timeout(
-    //   const Duration(seconds: 60),
-    //   onTimeout: (sink) {
-    //     print("[Timeout] Auto-stopping alarm.");
-    //     FlutterRingtonePlayer().stop();
-    //     receivePort.close();
-    //     IsolateNameServer.removePortNameMapping(portName);
-    //     stopped = true;
-    //   },
-    // ).forEach((msg) {
-    //   if (msg == 'stop_alarm') {
-    //     print("[Message] Stop alarm command received.");
-    //     FlutterRingtonePlayer().stop();
-    //     receivePort.close();
-    //     IsolateNameServer.removePortNameMapping(portName);
-    //     stopped = true;
-    //   }
-    //   LoggerService.debug(
-    //       "[EXIT] alarmId $alarmId isolate completed, msg $msg port $portName");
-    // });
-  }catch(e){
+    receivePort.listen((msg) async {
+      LoggerService.debug('Received msg from port ${msg.toString()}');
+      if (msg is Map && msg['type'] == 'stop_alarm') {
+        FlutterRingtonePlayer().stop();
+      }
+    });
+  } catch (e) {
     print("Error failed $e");
   }
 }
-
 
 DateTime getNextValidDateTime(DateTime original) {
   final now = DateTime.now();
@@ -166,24 +141,24 @@ Future<void> cancelSetAlarm(int baseId, {List<Day>? days}) async {
 }
 
 DateTime _nextDateForWeekday(DateTime alarmTime, int targetDay) {
-  if (targetDay == 0) {targetDay = 7;} // for sunday is 7
+  if (targetDay == 0) {
+    targetDay = 7;
+  } // for sunday is 7
   // final now = DateTime.now();
   // final today = now.weekday % 7;
   // final diff = (targetDay - today + 7) % 7;
   final today = DateTime.now().weekday;
   DateTime scheduledDay = DateTime.now();
-  if(today==targetDay){
+  if (today == targetDay) {
     scheduledDay = alarmTime.isBefore(scheduledDay)
         ? scheduledDay.add(Duration(days: 7))
         : scheduledDay;
 
     // scheduledDay = scheduledDay.add(Duration(days: 7));
-  }
-  else if(today<targetDay){
-    scheduledDay = scheduledDay.add(Duration(days: (targetDay-today)));
-  }
-  else{
-    scheduledDay = scheduledDay.add(Duration(days: (7 +targetDay-today)));
+  } else if (today < targetDay) {
+    scheduledDay = scheduledDay.add(Duration(days: (targetDay - today)));
+  } else {
+    scheduledDay = scheduledDay.add(Duration(days: (7 + targetDay - today)));
   }
   return DateTime(
     scheduledDay.year,
@@ -217,7 +192,6 @@ Future<void> _scheduleAlarmInstances(Alarm alarm) async {
         'isAlarm': alarm.isAlarm,
         'repeatWeekly': false,
         'scheduledTime': targetTime.toIso8601String(),
-
       },
     );
   } else {
@@ -257,9 +231,21 @@ Future<String> copyAssetToFile(String assetPath, String fileName) async {
 
   final file = File(filePath);
   await file.writeAsBytes(
-    byteData.buffer.asUint8List(
-        byteData.offsetInBytes, byteData.lengthInBytes),
+    byteData.buffer.asUint8List(byteData.offsetInBytes, byteData.lengthInBytes),
   );
 
   return filePath;
+}
+
+void testNotification() async {
+  LoggerService.debug("Test Notification");
+  const platform = MethodChannel('alarm_notification');
+  try {
+    await platform.invokeMethod('showNotification', {
+      'title': 'Test UI',
+      'message': 'Called from UI isolate',
+    });
+  } catch (e) {
+    print("UI call failed: $e");
+  }
 }
