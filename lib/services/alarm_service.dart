@@ -114,9 +114,9 @@ void alarmCallBack(int id, Map<String, dynamic> params) async {
 DateTime getNextValidDateTime(DateTime original) {
   final now = DateTime.now();
   while (original.isBefore(now)) {
-    // original = original.add(Duration(days: 7));
+    original = original.add(Duration(days: 7));
     //for testing
-    original = original.add(Duration(minutes: 2));
+    // original = original.add(Duration(minutes: 2));
   }
   return original;
 }

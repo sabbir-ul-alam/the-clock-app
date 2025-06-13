@@ -95,7 +95,6 @@ void receiveNotificationAction(NotificationResponse notificationResponse) {
   final portName = 'alarm_event_channel';
   // IsolateNameServer.removePortNameMapping(portName);
   final notiIsolate = IsolateNameServer.lookupPortByName(portName);
-
   LoggerService.debug(
       "Bacground Notification Action Response ${notificationResponse.actionId}");
   if (notificationResponse.actionId == 'stop_alarm') {
