@@ -1,5 +1,3 @@
-import 'dart:isolate';
-import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:theclockapp/services/notification_service.dart';
@@ -9,7 +7,6 @@ import 'services/hive_service.dart';
 import 'viewmodels/alarm_viewmodel.dart';
 import 'package:android_alarm_manager_plus/android_alarm_manager_plus.dart';
 import 'package:flutter/services.dart';
-
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 void main() async {
